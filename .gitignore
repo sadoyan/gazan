@@ -24,3 +24,13 @@ _testmain.go
 *.test
 *.prof
 
+
+src/github.com
+src/gopkg.in
+
+src/github.com/*
+src/gopkg.in/*
+
+pkg
+pkg/*
+
