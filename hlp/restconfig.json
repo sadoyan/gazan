@@ -1,0 +1,14 @@
+{
+    "/pooz": [
+        "http://192.168.10.1:8000/poloz"
+    ],
+    "/mukuch": [
+        "http://192.168.10.1:8000/mukuch",
+        "http://dwarf.netangels.loc:8000/mukuch"
+    ],
+    "/jivan": [
+        "http://gnome:8000/jivan",
+        "http://dwarf:8000jivan",
+        "http://192.168.10.1:8000jivan"
+    ]
+}
