@@ -34,3 +34,5 @@ src/gopkg.in/*
 pkg
 pkg/*
 
+.idea
+.idea/*
