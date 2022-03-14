@@ -10,9 +10,7 @@ import (
 	"utils"
 )
 
-var pause = false
-
-func postData(data string) {
+func postData(data map[string][]byte) {
 	transport := &http.Transport{
 		DialContext: (&net.Dialer{
 			Timeout:   30 * time.Second,
@@ -28,33 +26,34 @@ func postData(data string) {
 		Timeout:   time.Second * 10,
 		Transport: transport,
 	}
-	body := bytes.NewBufferString(data)
-	req, _ := http.NewRequest(http.MethodPost, utils.RetRandom(), body)
-	if to.clientAuth {
-		req.SetBasicAuth(to.clientUser, to.clientPass)
+	for _, value := range data {
+		req, _ := http.NewRequest(http.MethodPost, utils.RetRandom(), bytes.NewReader(value))
+		if to.clientAuth {
+			req.SetBasicAuth(to.clientUser, to.clientPass)
+		}
+		req.Header.Add("Content-Length", strconv.Itoa(len(value)))
+		resp, err := client.Do(req)
+
+		if err != nil {
+			to.queue <- data
+
+			chocho <- true
+			log.Println("Dead upstream:", err)
+			time.Sleep(2 * time.Second)
+			return
+		}
+		if !(resp.StatusCode >= 200 && resp.StatusCode < 300) {
+			to.queue <- data
+
+			chocho <- true
+			log.Println("Dead upstream:", err)
+			time.Sleep(2 * time.Second)
+			return
+		} else {
+
+			chocho <- false
+		}
+		_ = resp.Body.Close()
 	}
 
-	req.Header.Add("Content-Length", strconv.Itoa(len(data)))
-	resp, err := client.Do(req)
-	if err != nil {
-		to.queue <- data
-		pause = true
-		chocho <- true
-		log.Println("Dead upstream:", err)
-		time.Sleep(2 * time.Second)
-		return
-	}
-
-	defer resp.Body.Close()
-	if !(resp.StatusCode >= 200 && resp.StatusCode < 300) {
-		to.queue <- data
-		pause = true
-		chocho <- true
-		log.Println("Dead upstream:", err)
-		time.Sleep(2 * time.Second)
-		return
-	} else {
-		pause = false
-		chocho <- false
-	}
 }

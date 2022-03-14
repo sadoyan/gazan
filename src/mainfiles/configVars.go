@@ -19,7 +19,7 @@ type confVars struct {
 	clientPass       string
 	internalQueue    bool
 	rQueueName       string
-	queue            chan string
+	queue            chan map[string][]byte
 	monenabled       bool
 	monurl           string
 	monuser          string
@@ -38,7 +38,7 @@ var to = &confVars{
 	clientPass:       "",
 	internalQueue:    false,
 	rQueueName:       "oemetrics",
-	queue:            make(chan string, 5000000),
+	queue:            make(chan map[string][]byte, 5000000),
 	monenabled:       false,
 	monurl:           "127.0.0.1:9191",
 	monuser:          "",
@@ -64,7 +64,7 @@ func setVarsik() {
 	to.dispatchersCount, _ = cfg.Section("main").Key("dispatchers").Int()
 	to.internalQueue, _ = cfg.Section("main").Key("internalqueue").Bool()
 	qs, _ := cfg.Section("main").Key("queuesize").Int()
-	to.queue = make(chan string, qs)
+	to.queue = make(chan map[string][]byte, qs)
 
 	to.serverAuth, _ = cfg.Section("server").Key("serverauth").Bool()
 	to.serverUser = cfg.Section("server").Key("serveruser").String()

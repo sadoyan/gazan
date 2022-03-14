@@ -12,6 +12,8 @@ import (
 	"utils"
 )
 
+var fullurl string
+
 func dynHandler(w http.ResponseWriter, r *http.Request) {
 	const unauth = http.StatusUnauthorized
 	if to.serverAuth {
@@ -33,24 +35,23 @@ func dynHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	switch r.Method {
-	//case "GET":
-	//	myParam := r.URL.Query().Get("param")
-	//	if myParam != "" {
-	//		_, _ = fmt.Fprintln(w, "Param is:", myParam)
-	//
-	//	}
-	//	key := r.FormValue("key")
-	//	if key != "" {
-	//		_, _ = fmt.Fprintln(w, "Key is:", key)
-	//	}
 	case "POST", "PUT", "GET":
 		reqBody, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			log.Fatal(err)
 		}
+		go func(out chan<- map[string][]byte) {
+			switch r.TLS {
+			case nil:
+				fullurl = "http://" + r.Host + r.URL.Path
+			default:
+				fullurl = "https://" + r.Host + r.URL.Path
+			}
+			m := make(map[string][]byte)
+			m[fullurl] = reqBody
+			out <- m
+			log.Println(r.Proto, r.UserAgent(), r.RemoteAddr, r.Method, fullurl)
 
-		go func(out chan<- string) {
-			out <- string(reqBody)
 		}(to.queue)
 	default:
 		_, _ = fmt.Fprintf(w, "Sorry, only GET and POST methods are supported.")
@@ -61,7 +62,6 @@ func mxhandl(w http.ResponseWriter, _ *http.Request) {
 	mz := printStats()
 	_, _ = fmt.Fprintln(w, mz)
 }
-
 func dynconfig(w http.ResponseWriter, r *http.Request) {
 	utils.ApiConfig(r)
 }
