@@ -1,10 +1,9 @@
 package utils
 
 import (
-	"fmt"
+	"errors"
 	"math/rand"
 	"sync"
-	"time"
 )
 
 var seeds = []string{"https://netangels.net/utils/testurl"}
@@ -33,17 +32,30 @@ func testEq(a, b []string) bool {
 	return true
 }
 
-func GetSeed() {
-	for {
-		thishosts := GetHostsByHTTP(seed)
-		if !testEq(thishosts, hostlist) {
-			hostlist = thishosts
-			hoho.RWMutex.Lock()
-			hoho.Hostlist = thishosts
-			hoho.RWMutex.Unlock()
-			fmt.Println("New hosts list is", hoho.Hostlist)
-		}
-		time.Sleep(10 * time.Second)
+//func GetSeed() {
+//	for {
+//		thishosts := GetHostsByHTTP(seed)
+//		if !testEq(thishosts, hostlist) {
+//			hostlist = thishosts
+//			hoho.RWMutex.Lock()
+//			hoho.Hostlist = thishosts
+//			hoho.RWMutex.Unlock()
+//			fmt.Println("New hosts list is", hoho.Hostlist)
+//		}
+//		time.Sleep(10 * time.Second)
+//	}
+//
+//}
+
+func RetRandomMap(key string) (string, error) {
+
+	if len(Dconf.Upstreams[key]) >= 1 {
+		randomIndex := rand.Intn(len(Dconf.Upstreams[key]))
+		pick := Dconf.Upstreams[key][randomIndex]
+		return pick, nil
+
+	} else {
+		return "", errors.New("upstream not found, or upstreams list is empty")
 	}
 
 }

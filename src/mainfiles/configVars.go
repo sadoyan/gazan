@@ -8,8 +8,8 @@ import (
 )
 
 type confVars struct {
-	httpAddress      string
-	destinationURL   string
+	httpAddress string
+	//destinationURL   string
 	dispatchersCount int
 	serverAuth       bool
 	serverUser       string
@@ -27,8 +27,8 @@ type confVars struct {
 }
 
 var to = &confVars{
-	httpAddress:      "127.0.0.1:8080",
-	destinationURL:   "http://127.0.0.1:8000",
+	httpAddress: "127.0.0.1:8080",
+	//destinationURL:   "http://127.0.0.1:8000",
 	dispatchersCount: 20,
 	serverAuth:       false,
 	serverUser:       "",
@@ -60,7 +60,7 @@ func setVarsik() {
 	}
 
 	to.httpAddress = cfg.Section("main").Key("listen").String()
-	to.destinationURL = cfg.Section("main").Key("remote").String()
+	//to.destinationURL = cfg.Section("main").Key("remote").String()
 	to.dispatchersCount, _ = cfg.Section("main").Key("dispatchers").Int()
 	to.internalQueue, _ = cfg.Section("main").Key("internalqueue").Bool()
 	qs, _ := cfg.Section("main").Key("queuesize").Int()

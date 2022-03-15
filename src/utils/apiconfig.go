@@ -5,16 +5,18 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"sync"
 )
 
-//var dynconfigs []map[string]interface{}
-var dynconfigs map[string][]string
-
-type ddconf struct {
-	coco map[string][]string
+type Ddconf struct {
+	Upstreams map[string][]string
+	sync.RWMutex
 }
 
-var dconf *ddconf
+var Dconf = Ddconf{
+	Upstreams: nil,
+	RWMutex:   sync.RWMutex{},
+}
 
 func logprint(msg string, err error) {
 	if err != nil {
@@ -25,28 +27,14 @@ func logprint(msg string, err error) {
 func ApiConfig(r *http.Request) {
 
 	decoder := json.NewDecoder(r.Body)
-	er := decoder.Decode(&dynconfigs)
+	er := decoder.Decode(&Dconf.Upstreams)
 	logprint("Json Decode error:", er)
 
-	for k, v := range dynconfigs {
-		fmt.Println("Key:", k)
+	for k, v := range Dconf.Upstreams {
 		for vv := range v {
-			fmt.Println("Value:", v[vv])
+			fmt.Println("Registering URL", k, "To Upstream:", v[vv])
 		}
 		fmt.Println(" ")
 	}
-
-	//fmt.Println("- - - - - - - - - - - - - - - - - ")
-	//decot := json.Marshal()
-	//e := decoder.Decode(dconf.coco)
-	//logprint("Json Decode error:", e)
-
-	//for k, v := range dconf.coco {
-	//	fmt.Println("Key:", k)
-	//	for vv := range v {
-	//		fmt.Println("Value:", v[vv])
-	//	}
-	//	fmt.Println(" ")
-	//}
 
 }

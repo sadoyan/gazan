@@ -2,48 +2,44 @@ package utils
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net"
-	"net/http"
-	"strings"
-	"time"
 )
 
-func GetHostsByHTTP(seed string) []string {
-	transport := &http.Transport{
-		DialContext: (&net.Dialer{
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
-		}).DialContext,
-		MaxIdleConns:          100,
-		IdleConnTimeout:       90 * time.Second,
-		TLSHandshakeTimeout:   10 * time.Second,
-		ExpectContinueTimeout: 5 * time.Second,
-	}
-	client := &http.Client{
-		Timeout:   time.Second * 15,
-		Transport: transport,
-	}
-	resp, ee := client.Get(seed)
-	if ee != nil {
-		fmt.Println(ee)
-		return hostlist
-	}
-	defer resp.Body.Close()
-	bodyBytes, _ := ioutil.ReadAll(resp.Body)
-	hosts := strings.Split(string(bodyBytes), "\n")
-
-	var thishosts []string
-
-	for host := range hosts {
-		if hosts[host] != "" {
-			thishosts = append(thishosts, hosts[host])
-		}
-	}
-
-	return thishosts
-
-}
+//func GetHostsByHTTP(seed string) []string {
+//	transport := &http.Transport{
+//		DialContext: (&net.Dialer{
+//			Timeout:   30 * time.Second,
+//			KeepAlive: 30 * time.Second,
+//		}).DialContext,
+//		MaxIdleConns:          100,
+//		IdleConnTimeout:       90 * time.Second,
+//		TLSHandshakeTimeout:   10 * time.Second,
+//		ExpectContinueTimeout: 5 * time.Second,
+//	}
+//	client := &http.Client{
+//		Timeout:   time.Second * 15,
+//		Transport: transport,
+//	}
+//	resp, ee := client.Get(seed)
+//	if ee != nil {
+//		fmt.Println(ee)
+//		return hostlist
+//	}
+//	defer resp.Body.Close()
+//	bodyBytes, _ := ioutil.ReadAll(resp.Body)
+//	hosts := strings.Split(string(bodyBytes), "\n")
+//
+//	var thishosts []string
+//
+//	for host := range hosts {
+//		if hosts[host] != "" {
+//			thishosts = append(thishosts, hosts[host])
+//		}
+//	}
+//
+//	return thishosts
+//
+//}
 
 func GetHostsByDNS() {
 	fmt.Println("")

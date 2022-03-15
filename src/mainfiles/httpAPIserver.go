@@ -50,7 +50,8 @@ func dynHandler(w http.ResponseWriter, r *http.Request) {
 			m := make(map[string][]byte)
 			m[fullurl] = reqBody
 			out <- m
-			log.Println(r.Proto, r.UserAgent(), r.RemoteAddr, r.Method, fullurl)
+			//log.Println(r.Proto, r.UserAgent(), r.RemoteAddr, r.Method, fullurl)
+			log.Println(r.Proto, r.RemoteAddr, r.Method, fullurl)
 
 		}(to.queue)
 	default:

@@ -1,14 +1,14 @@
 {
-    "/pooz": [
+    "http://pastor:8080/pooz": [
         "http://192.168.10.1:8000/poloz"
     ],
-    "/mukuch": [
+    "http://127.0.0.1:8080/mukuch": [
         "http://192.168.10.1:8000/mukuch",
         "http://dwarf.netangels.loc:8000/mukuch"
     ],
-    "/jivan": [
+    "http://192.168.10.10:8080/jivan": [
         "http://gnome:8000/jivan",
-        "http://dwarf:8000jivan",
-        "http://192.168.10.1:8000jivan"
+        "http://dwarf:8000/jivan",
+        "http://192.168.10.1:8000/jivan"
     ]
 }
