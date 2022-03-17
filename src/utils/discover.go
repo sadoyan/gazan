@@ -3,22 +3,21 @@ package utils
 import (
 	"errors"
 	"math/rand"
-	"sync"
 )
 
-var seeds = []string{"https://netangels.net/utils/testurl"}
-var seed = "https://netangels.net/utils/testurl"
-var hostlist []string
+//var seeds = []string{"https://netangels.net/utils/testurl"}
+//var seed = "https://netangels.net/utils/testurl"
+//var hostlist []string
 
-type hl struct {
-	Hostlist []string
-	sync.RWMutex
-}
+//type hl struct {
+//	Hostlist []string
+//	sync.RWMutex
+//}
 
-var hoho = hl{
-	Hostlist: nil,
-	RWMutex:  sync.RWMutex{},
-}
+//var hoho = hl{
+//	Hostlist: nil,
+//	RWMutex:  sync.RWMutex{},
+//}
 
 func testEq(a, b []string) bool {
 	if len(a) != len(b) {
@@ -60,8 +59,8 @@ func RetRandomMap(key string) (string, error) {
 
 }
 
-func RetRandom() string {
-	randomIndex := rand.Intn(len(hoho.Hostlist))
-	pick := hoho.Hostlist[randomIndex]
+func RetRandom(hoho []string) string {
+	randomIndex := rand.Intn(len(hoho))
+	pick := hoho[randomIndex]
 	return pick
 }
