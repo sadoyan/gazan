@@ -1,56 +1,49 @@
 package utils
 
-import (
-	"log"
-	"net"
-	"net/http"
-	"time"
-)
-
-func GetHostsByHTTP() {
-	transport := &http.Transport{
-		DialContext: (&net.Dialer{
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
-		}).DialContext,
-		MaxIdleConns:          100,
-		IdleConnTimeout:       90 * time.Second,
-		TLSHandshakeTimeout:   10 * time.Second,
-		ExpectContinueTimeout: 5 * time.Second,
-	}
-
-	for {
-		client := &http.Client{
-			Timeout:   time.Second * 15,
-			Transport: transport,
-		}
-		for k, v := range Serob {
-			var newlist []string
-			for t := range v {
-				resp, ee := client.Get(v[t])
-				if ee != nil {
-					log.Println(ee)
-				} else {
-					if resp.StatusCode >= 100 && resp.StatusCode < 500 {
-						resp.Body.Close()
-						newlist = append(newlist, v[t])
-					}
-				}
-
-			}
-			switch testEq(newlist, Dconf.Upstreams[k]) {
-			case false:
-				Dconf.Lock()
-				log.Println("Upstreams list is changes to", newlist)
-				Dconf.Upstreams[k] = newlist
-				Dconf.Unlock()
-			}
-		}
-		//valod()
-		time.Sleep(5 * time.Second)
-	}
-
-}
+//func GetHostsByHTTP() {
+//	transport := &http.Transport{
+//		DialContext: (&net.Dialer{
+//			Timeout:   30 * time.Second,
+//			KeepAlive: 30 * time.Second,
+//		}).DialContext,
+//		MaxIdleConns:          100,
+//		IdleConnTimeout:       90 * time.Second,
+//		TLSHandshakeTimeout:   10 * time.Second,
+//		ExpectContinueTimeout: 5 * time.Second,
+//	}
+//
+//	for {
+//		client := &http.Client{
+//			Timeout:   time.Second * 15,
+//			Transport: transport,
+//		}
+//		for k, v := range Serob {
+//			var newlist []string
+//			for t := range v {
+//				resp, ee := client.Get(v[t])
+//				if ee != nil {
+//					log.Println(ee)
+//				} else {
+//					if resp.StatusCode >= 100 && resp.StatusCode < 500 {
+//						resp.Body.Close()
+//						newlist = append(newlist, v[t])
+//					}
+//				}
+//
+//			}
+//			switch testEq(newlist, Dconf.Upstreams[k]) {
+//			case false:
+//				Dconf.Lock()
+//				log.Println("Upstreams list is changes to", newlist)
+//				Dconf.Upstreams[k] = newlist
+//				Dconf.Unlock()
+//			}
+//		}
+//		//valod()
+//		time.Sleep(5 * time.Second)
+//	}
+//
+//}
 
 //func GetHostsByDNS() {
 //	fmt.Println("")

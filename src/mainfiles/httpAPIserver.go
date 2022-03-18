@@ -35,27 +35,29 @@ func dynHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	switch r.Method {
-	case "POST", "PUT", "GET":
+	case "POST", "GET":
 		reqBody, err := ioutil.ReadAll(r.Body)
 		if err != nil {
 			log.Fatal(err)
 		}
-		go func(out chan<- map[string][]byte) {
-			switch r.TLS {
-			case nil:
-				fullurl = "http://" + r.Host + r.URL.Path
-			default:
-				fullurl = "https://" + r.Host + r.URL.Path
-			}
-			m := make(map[string][]byte)
-			m[fullurl] = reqBody
-			out <- m
-			//log.Println(r.Proto, r.UserAgent(), r.RemoteAddr, r.Method, fullurl)
-			log.Println(r.Proto, r.RemoteAddr, r.Method, fullurl)
+		switch r.TLS {
+		case nil:
+			fullurl = "http://" + r.Host + r.URL.Path
+		default:
+			fullurl = "https://" + r.Host + r.URL.Path
+		}
+		m := make(map[string][]byte)
+		m[fullurl] = reqBody
 
-		}(to.queue)
+		status, body, err := postData(m, r.Method)
+		w.WriteHeader(status)
+		w.Write(body)
+
+		log.Println(r.Proto, r.RemoteAddr, r.Method, fullurl)
 	default:
-		_, _ = fmt.Fprintf(w, "Sorry, only GET and POST methods are supported.")
+		w.WriteHeader(501)
+		w.Write([]byte("Method (" + r.Method + ") Not implemented"))
+		//_, _ = fmt.Fprintf(w, "Sorry, only GET and POST methods are supported.")
 	}
 }
 
@@ -107,8 +109,6 @@ func playmux2() {
 
 }
 
-var chocho = make(chan bool)
-
 func RunServer() {
 	setVarsik()
 	http.HandleFunc("/", dynHandler)
@@ -117,28 +117,13 @@ func RunServer() {
 	if to.monenabled {
 		go playmux1()
 	}
-	// ---------------------------------------------- //
 	go playmux2()
-	// ---------------------------------------------- //
 	log.Print("Started Proxy ")
-	for j := 0; j < to.dispatchersCount; j++ {
-		go func() {
-			for {
-				s := <-to.queue
-				postData(s)
-			}
-		}()
-	}
-
-	go func(in chan bool) {
-		for {
-			_ = <-in
-		}
-	}(chocho)
-
 	runtime.Gosched()
-	playmux0()
+	go playmux0()
+	time.Sleep(time.Second)
+	utils.LoadUpstreams(to.upstreamsFile)
+	forever := make(chan bool)
+	<-forever
 
-	//forever := make(chan bool)
-	//<-forever
 }

@@ -8,12 +8,10 @@ import (
 //var seeds = []string{"https://netangels.net/utils/testurl"}
 //var seed = "https://netangels.net/utils/testurl"
 //var hostlist []string
-
 //type hl struct {
 //	Hostlist []string
 //	sync.RWMutex
 //}
-
 //var hoho = hl{
 //	Hostlist: nil,
 //	RWMutex:  sync.RWMutex{},

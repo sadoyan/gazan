@@ -21,7 +21,7 @@ var Dconf = &Ddconf{
 }
 var Serob = make(map[string][]string)
 
-func logprint(msg string, err error) {
+func Logprint(msg interface{}, err error) {
 	if err != nil {
 		log.Println(msg, err)
 	}
@@ -33,7 +33,7 @@ func ApiConfig(r *http.Request) {
 	er := decoder.Decode(&Dconf.Upstreams)
 	Dconf.Unlock()
 
-	logprint("Json Decode error:", er)
+	Logprint("Json Decode error:", er)
 	for k, v := range Dconf.Upstreams {
 		Serob[k] = v
 		for vv := range v {

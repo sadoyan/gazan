@@ -2,12 +2,11 @@ package main
 
 import (
 	"mainfiles"
-	"utils"
 )
 
 func main() {
 	//go utils.GetSeed()
 	//utils.GetHostsByDNS()
-	go utils.GetHostsByHTTP()
+	//go utils.GetHostsByHTTP()
 	mainfiles.RunServer()
 }
