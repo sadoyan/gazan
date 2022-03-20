@@ -71,20 +71,22 @@ func postData(data map[string][]byte, method string) (int, []uint8, error) {
 				return 500, nil, err
 			}
 
-			buf, buferr := ioutil.ReadAll(resp.Body)
-			utils.Logprint("clientient read body error", buferr)
+			buf, buerr := ioutil.ReadAll(resp.Body)
+			if buerr != nil {
+				log.Println("clientient read body error", buerr)
+			}
 
 			if !(resp.StatusCode >= 200 && resp.StatusCode < 300) {
 				log.Println("Dead upstream:", err)
 				time.Sleep(2 * time.Second)
 				fmt.Println("")
-				resp.Body.Close()
+				_ = resp.Body.Close()
 				return resp.StatusCode, nil, err
 			} else {
-				resp.Body.Close()
+				_ = resp.Body.Close()
 				return resp.StatusCode, buf, nil
 			}
-			resp.Body.Close()
+			//_ = resp.Body.Close()
 		} else {
 			return 503, []uint8("503 Service Unavailable"), e
 			//log.Println(e)

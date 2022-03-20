@@ -3,43 +3,41 @@ package utils
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
-	"sync"
 )
-
-type Ddconf struct {
-	Upstreams map[string][]string
-	Constants map[string][]string
-	sync.RWMutex
-}
-
-var Dconf = &Ddconf{
-	Upstreams: nil,
-	Constants: nil,
-	RWMutex:   sync.RWMutex{},
-}
-var Serob = make(map[string][]string)
-
-func Logprint(msg interface{}, err error) {
-	if err != nil {
-		log.Println(msg, err)
-	}
-}
 
 func ApiConfig(r *http.Request) {
 	Dconf.Lock()
 	decoder := json.NewDecoder(r.Body)
 	er := decoder.Decode(&Dconf.Upstreams)
 	Dconf.Unlock()
-
-	Logprint("Json Decode error:", er)
+	if er != nil {
+		log.Println("Json Decode error:", er)
+	}
 	for k, v := range Dconf.Upstreams {
 		Serob[k] = v
 		for vv := range v {
 			fmt.Println("Registering URL", k, "To Upstream:", v[vv])
 		}
 		fmt.Println(" ")
+	}
+
+}
+
+func LoadUpstreams(up string) {
+	data, err := ioutil.ReadFile(up)
+	if err != nil {
+		log.Println("Cant load default upstreams file:", err)
+		log.Println("Startingwithout upstreams")
+	} else {
+		er := json.Unmarshal([]byte(data), &Dconf.Upstreams)
+		if er == nil {
+			log.Println("Sucesfully loaded default upstrems list")
+		} else {
+			log.Println("Error decoding default upstreams list")
+		}
 	}
 
 }

@@ -8,5 +8,7 @@ func main() {
 	//go utils.GetSeed()
 	//utils.GetHostsByDNS()
 	//go utils.GetHostsByHTTP()
+
+	//utils.CheckJWTtoken()
 	mainfiles.RunServer()
 }

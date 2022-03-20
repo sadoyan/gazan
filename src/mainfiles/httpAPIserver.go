@@ -1,44 +1,25 @@
 package mainfiles
 
 import (
-	"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"runtime"
-	"strings"
 	"time"
 	"utils"
 )
 
-var fullurl string
-
 func dynHandler(w http.ResponseWriter, r *http.Request) {
-	const unauth = http.StatusUnauthorized
+	var fullurl string
 	if to.serverAuth {
-		auth := r.Header.Get("Authorization")
-		if !strings.HasPrefix(auth, "Basic ") {
-			log.Print("Invalid authorization:", auth)
-			http.Error(w, http.StatusText(unauth), unauth)
-			return
-		}
-		up, err := base64.StdEncoding.DecodeString(auth[6:])
-		if err != nil {
-			log.Print("authorization decode error:", err)
-			http.Error(w, http.StatusText(unauth), unauth)
-			return
-		}
-		if string(up) != authorized["server"] {
-			http.Error(w, http.StatusText(unauth), unauth)
-			return
-		}
+		utils.CheckAuth(w, r, authorized["server"])
 	}
 	switch r.Method {
 	case "POST", "GET":
 		reqBody, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 		switch r.TLS {
 		case nil:
@@ -48,16 +29,19 @@ func dynHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		m := make(map[string][]byte)
 		m[fullurl] = reqBody
-
 		status, body, err := postData(m, r.Method)
 		w.WriteHeader(status)
-		w.Write(body)
-
+		_, ee := w.Write(body)
+		if ee != nil {
+			log.Println(ee)
+		}
 		log.Println(r.Proto, r.RemoteAddr, r.Method, fullurl)
 	default:
 		w.WriteHeader(501)
-		w.Write([]byte("Method (" + r.Method + ") Not implemented"))
-		//_, _ = fmt.Fprintf(w, "Sorry, only GET and POST methods are supported.")
+		_, ee := w.Write([]byte("Method (" + r.Method + ") Not implemented"))
+		if ee != nil {
+			log.Println(ee)
+		}
 	}
 }
 
@@ -66,6 +50,9 @@ func mxhandl(w http.ResponseWriter, _ *http.Request) {
 	_, _ = fmt.Fprintln(w, mz)
 }
 func dynconfig(w http.ResponseWriter, r *http.Request) {
+	if to.serverAuth {
+		utils.CheckAuth(w, r, authorized["server"])
+	}
 	utils.ApiConfig(r)
 }
 
