@@ -13,7 +13,7 @@ var m runtime.MemStats
 
 type metrics struct {
 	Alloc        uint64 `json:"alloc,int"`
-	Total        uint64 `json:"total,int"`
+	Total        uint64 `json:"To.al,int"`
 	System       uint64 `json:"system,int"`
 	Gcnum        uint32 `json:"gcnum,int"`
 	Frees        uint64 `json:"frees,int"`
@@ -24,7 +24,7 @@ type metrics struct {
 	HeapReleased uint64 `json:"heapreleased,int"`
 	LastGC       uint64 `json:"lastgc,int"`
 	NumForcedGC  uint32 `json:"forcegc,int"`
-	PauseTotalNs uint64 `json:"pausetotal,int"`
+	PauseTotalNs uint64 `json:"pauseTo.al,int"`
 	Goroutines   int    `json:"goroutines,int"`
 	//QueueLen     int    `json:"queuelen,int"`
 }
@@ -46,7 +46,7 @@ func printStats() (s string) {
 	u.PauseTotalNs = m.PauseTotalNs
 	u.NumForcedGC = m.NumForcedGC
 	u.Goroutines = runtime.NumGoroutine()
-	//u.QueueLen = len(to.queue)
+	//u.QueueLen = len(To.queue)
 
 	//result, _ := json.Marshal(u)
 	result, _ := json.MarshalIndent(u, "", "    ")

@@ -12,7 +12,7 @@ import (
 
 func dynHandler(w http.ResponseWriter, r *http.Request) {
 	var fullurl string
-	if to.serverAuth {
+	if To.serverAuth {
 		utils.CheckAuth(w, r, authorized["server"])
 	}
 	switch r.Method {
@@ -29,13 +29,15 @@ func dynHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		m := make(map[string][]byte)
 		m[fullurl] = reqBody
-		status, body, err := postData(m, r.Method)
+		status, body, err := PostData(m, r.Method)
 		w.WriteHeader(status)
 		_, ee := w.Write(body)
 		if ee != nil {
 			log.Println(ee)
 		}
-		log.Println(r.Proto, r.RemoteAddr, r.Method, fullurl)
+		if To.accesslog {
+			log.Println(r.Proto, r.RemoteAddr, r.Method, fullurl)
+		}
 	default:
 		w.WriteHeader(501)
 		_, ee := w.Write([]byte("Method (" + r.Method + ") Not implemented"))
@@ -50,7 +52,7 @@ func mxhandl(w http.ResponseWriter, _ *http.Request) {
 	_, _ = fmt.Fprintln(w, mz)
 }
 func dynconfig(w http.ResponseWriter, r *http.Request) {
-	if to.serverAuth {
+	if To.serverAuth {
 		utils.CheckAuth(w, r, authorized["server"])
 	}
 	utils.ApiConfig(r)
@@ -61,7 +63,7 @@ func playmux0() {
 	mux.HandleFunc("/", dynHandler)
 
 	s1 := http.Server{
-		Addr:         to.httpAddress,
+		Addr:         To.httpAddress,
 		Handler:      mux,
 		ReadTimeout:  100 * time.Second,
 		WriteTimeout: 100 * time.Second,
@@ -99,9 +101,9 @@ func playmux2() {
 func RunServer() {
 	setVarsik()
 	http.HandleFunc("/", dynHandler)
-	fmt.Println("starting server at: " + to.httpAddress)
+	fmt.Println("starting server at: " + To.httpAddress)
 
-	if to.monenabled {
+	if To.monenabled {
 		go playmux1()
 	}
 	go playmux2()
@@ -109,7 +111,7 @@ func RunServer() {
 	runtime.Gosched()
 	go playmux0()
 	time.Sleep(time.Second)
-	utils.LoadUpstreams(to.upstreamsFile)
+	utils.LoadUpstreamsFronFIle(To.upstreamsFile)
 	forever := make(chan bool)
 	<-forever
 

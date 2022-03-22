@@ -25,7 +25,7 @@ import (
 //	return client
 //}
 
-func postData(data map[string][]byte, method string) (int, []uint8, error) {
+func PostData(data map[string][]byte, method string) (int, []uint8, error) {
 	//transport := &http.Transport{
 	//	DialContext: (&net.Dialer{
 	//		Timeout:   30 * time.Second,
@@ -57,11 +57,11 @@ func postData(data map[string][]byte, method string) (int, []uint8, error) {
 			//req, histeric := http.NewRequestWithContext(traceCtx, http.MethodPost, veq, bytes.NewReader(v))
 
 			if histeric != nil {
-				log.Println("Error connecting to upstream:", veq)
+				log.Println("Error connecting To.upstream:", veq)
 				break
 			}
-			if to.clientAuth {
-				req.SetBasicAuth(to.clientUser, to.clientPass)
+			if To.clientAuth {
+				req.SetBasicAuth(To.clientUser, To.clientPass)
 			}
 			req.Header.Add("Content-Length", strconv.Itoa(len(v)))
 			resp, err := http.DefaultClient.Do(req)

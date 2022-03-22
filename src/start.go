@@ -2,6 +2,7 @@ package main
 
 import (
 	"mainfiles"
+	"utils"
 )
 
 func main() {
@@ -9,6 +10,6 @@ func main() {
 	//utils.GetHostsByDNS()
 	//go utils.GetHostsByHTTP()
 
-	//utils.CheckJWTtoken()
+	go utils.Valod(mainfiles.To.Healtchecks)
 	mainfiles.RunServer()
 }

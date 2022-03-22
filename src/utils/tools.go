@@ -63,6 +63,15 @@ func CheckAuth(w http.ResponseWriter, r *http.Request, authorized string) {
 	}
 }
 
+func Contains(a []string, x string) bool {
+	for _, n := range a {
+		if x == n {
+			return true
+		}
+	}
+	return false
+}
+
 func CheckJWTtoken() {
 	fmt.Println("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
 	fmt.Println("Parse-Hmac")
