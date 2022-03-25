@@ -1,6 +1,7 @@
 package mainfiles
 
 import (
+	"configs"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -12,9 +13,12 @@ import (
 
 func dynHandler(w http.ResponseWriter, r *http.Request) {
 	var fullurl string
-	if To.serverAuth {
-		utils.CheckAuth(w, r, authorized["server"])
+	if configs.To.ServerAuth {
+		if !utils.CheckAuth(w, r) {
+			return
+		}
 	}
+
 	switch r.Method {
 	case "POST", "GET":
 		reqBody, err := ioutil.ReadAll(r.Body)
@@ -35,7 +39,7 @@ func dynHandler(w http.ResponseWriter, r *http.Request) {
 		if ee != nil {
 			log.Println(ee)
 		}
-		if To.accesslog {
+		if configs.To.Accesslog {
 			log.Println(r.Proto, r.RemoteAddr, r.Method, fullurl)
 		}
 	default:
@@ -52,8 +56,8 @@ func mxhandl(w http.ResponseWriter, _ *http.Request) {
 	_, _ = fmt.Fprintln(w, mz)
 }
 func dynconfig(w http.ResponseWriter, r *http.Request) {
-	if To.serverAuth {
-		utils.CheckAuth(w, r, authorized["server"])
+	if configs.To.ServerAuth {
+		utils.CheckAuth(w, r)
 	}
 	utils.ApiConfig(r)
 }
@@ -63,7 +67,7 @@ func playmux0() {
 	mux.HandleFunc("/", dynHandler)
 
 	s1 := http.Server{
-		Addr:         To.httpAddress,
+		Addr:         configs.To.HttpAddress,
 		Handler:      mux,
 		ReadTimeout:  100 * time.Second,
 		WriteTimeout: 100 * time.Second,
@@ -99,11 +103,11 @@ func playmux2() {
 }
 
 func RunServer() {
-	setVarsik()
+	configs.SetVarsik()
 	http.HandleFunc("/", dynHandler)
-	fmt.Println("starting server at: " + To.httpAddress)
+	fmt.Println("starting server at: " + configs.To.HttpAddress)
 
-	if To.monenabled {
+	if configs.To.Monenabled {
 		go playmux1()
 	}
 	go playmux2()
@@ -111,7 +115,7 @@ func RunServer() {
 	runtime.Gosched()
 	go playmux0()
 	time.Sleep(time.Second)
-	utils.LoadUpstreamsFronFIle(To.upstreamsFile)
+	utils.LoadUpstreamsFronFIle(configs.To.UpstreamsFile)
 	forever := make(chan bool)
 	<-forever
 

@@ -2,54 +2,52 @@ package mainfiles
 
 import (
 	"bytes"
+	"configs"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"strconv"
 	"time"
 	"utils"
 )
 
-//func httpClient() *http.Client {
-//	client := &http.Client{
-//		Transport: &http.Transport{
-//			MaxIdleConns:          100,
-//			IdleConnTimeout:       90 * time.Second,
-//			TLSHandshakeTimeout:   10 * time.Second,
-//			ExpectContinueTimeout: 1 * time.Second,
-//			MaxIdleConnsPerHost:   10,
-//		},
-//		Timeout: 10 * time.Second,
-//	}
-//	return client
+//var transport = &http.Transport{
+//	DialContext: (&net.Dialer{
+//		Timeout:   30 * time.Second,
+//		KeepAlive: 30 * time.Second,
+//	}).DialContext,
+//	MaxIdleConns:          100,
+//	MaxConnsPerHost:       10,
+//	MaxIdleConnsPerHost:   10,
+//	IdleConnTimeout:       90 * time.Second,
+//	TLSHandshakeTimeout:   10 * time.Second,
+//	ExpectContinueTimeout: 1 * time.Second,
+//}
+//var client = &http.Client{
+//	Timeout:   time.Second * 10,
+//	Transport: transport,
 //}
 
+var transport = &http.Transport{
+	DialContext: (&net.Dialer{
+		Timeout:   30 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}).DialContext,
+	MaxIdleConns:          configs.To.Clienmaxidle,
+	MaxConnsPerHost:       configs.To.Clienmaxperhost,
+	MaxIdleConnsPerHost:   configs.To.Clienmaxidleperhost,
+	IdleConnTimeout:       configs.To.Clienidletimeout * time.Second,
+	TLSHandshakeTimeout:   10 * time.Second,
+	ExpectContinueTimeout: 1 * time.Second,
+}
+var client = &http.Client{
+	Timeout:   time.Second * configs.To.Clientimeout,
+	Transport: transport,
+}
+
 func PostData(data map[string][]byte, method string) (int, []uint8, error) {
-	//transport := &http.Transport{
-	//	DialContext: (&net.Dialer{
-	//		Timeout:   30 * time.Second,
-	//		KeepAlive: 30 * time.Second,
-	//	}).DialContext,
-	//	MaxIdleConns:          100,
-	//	IdleConnTimeout:       90 * time.Second,
-	//	TLSHandshakeTimeout:   10 * time.Second,
-	//	ExpectContinueTimeout: 1 * time.Second,
-	//	MaxIdleConnsPerHost:   10,
-	//}
-	//client := &http.Client{
-	//	Timeout:   time.Second * 10,
-	//	Transport: transport,
-	//}
-	//client := httpClient()
-	//resp, err := client.Do(req)
-
-	//clientTrace := &httptrace.ClientTrace{
-	//	GotConn: func(info httptrace.GotConnInfo) { log.Printf("conn was reused: %t", info.Reused) },
-	//}
-	//traceCtx := httptrace.WithClientTrace(context.Background(), clientTrace)
-	//req, histeric := http.NewRequestWithContext(traceCtx, http.MethodPost, veq, bytes.NewReader(v))
-
 	for k, v := range data {
 		veq, e := utils.RetRandomMap(k)
 		if e == nil {
@@ -57,14 +55,16 @@ func PostData(data map[string][]byte, method string) (int, []uint8, error) {
 			//req, histeric := http.NewRequestWithContext(traceCtx, http.MethodPost, veq, bytes.NewReader(v))
 
 			if histeric != nil {
-				log.Println("Error connecting To.upstream:", veq)
+				log.Println("Error connecting To Upstream:", veq)
 				break
 			}
-			if To.clientAuth {
-				req.SetBasicAuth(To.clientUser, To.clientPass)
+			if configs.To.ClientAuth {
+				req.SetBasicAuth(configs.To.ClientUser, configs.To.ClientPass)
 			}
 			req.Header.Add("Content-Length", strconv.Itoa(len(v)))
-			resp, err := http.DefaultClient.Do(req)
+			//resp, err := http.DefaultClient.Do(req)
+			resp, err := client.Do(req)
+			// - - - - - - - - - - - - - - - - - - - - - - -
 			if err != nil {
 				log.Println("Dead upstream:", err)
 				time.Sleep(2 * time.Second)
