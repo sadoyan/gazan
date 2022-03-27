@@ -2,7 +2,9 @@ package utils
 
 import (
 	"configs"
+	"crypto/sha256"
 	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt"
@@ -10,7 +12,6 @@ import (
 	"math/rand"
 	"net/http"
 	"strings"
-	"time"
 )
 
 func testEq(a, b []string) bool {
@@ -127,70 +128,77 @@ func Contains(a []string, x string) bool {
 	return false
 }
 
+type jwtinput struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+func GenJWTtoken(in []byte) ([]byte, error) {
+	var jwtin jwtinput
+	err := json.Unmarshal(in, &jwtin)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	hmacSampleSecret := []byte("Super$ecter123765@")
+	//token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+	//	"username": jwtin.Username,
+	//	"password": jwtin.Password,
+	//})
+	hash := fmt.Sprintf("%x", sha256.Sum256([]byte(jwtin.Username+jwtin.Password)))
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"hash": hash,
+	})
+
+	tokenString, err2 := token.SignedString(hmacSampleSecret)
+	if err != nil {
+		log.Println("Error Getting JWT signed key:", err2)
+		return nil, err2
+	}
+	//log.Println("Generating new JWT token for", jwtin.Username)
+	fmt.Println(jwtin.Username, jwtin.Password, tokenString)
+	return []byte(tokenString), nil
+	// curl -XPOST -d '{"username":"gesho", "password": "polozmukuck"}' http://127.0.0.1:8080/login
+}
+
 func CheckJWTtoken() {
 	fmt.Println("")
 	fmt.Println("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-	fmt.Println("Parse-Hmac")
-	var hmacSampleSecret []byte
+	//fmt.Println("Parse-Hmac")
 	//hmacSampleSecret := []byte("my_secret_key")
-
-	tokenString := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJmb29vb29vb29vb29vb29vb28iOjE0NDQ0Nzg0MDB9.AS9-OaZWBdI4DR_j_a0qcCP1xxTLFH52WudB2unZA14"
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		fmt.Println(hmacSampleSecret)
-		return hmacSampleSecret, nil
-	})
-
-	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-		fmt.Println(claims["foooooooooooooooo"], claims["baaaaaaaaaaaaar"])
-		fmt.Println(claims)
-
-	} else {
-		fmt.Println(err)
-	}
-
-	fmt.Println(*token)
-	fmt.Println("New-Hmac")
+	//
+	//tokenString := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJmb29vb29vb29vb29vb29vb28iOjE0NDQ0Nzg0MDB9.AS9-OaZWBdI4DR_j_a0qcCP1xxTLFH52WudB2unZA14"
+	//token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	//	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+	//		return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+	//	}
+	//	fmt.Println(hmacSampleSecret)
+	//	return hmacSampleSecret, nil
+	//})
+	//
+	//if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+	//	fmt.Println(claims["foooooooooooooooo"], claims["baaaaaaaaaaaaar"])
+	//	fmt.Println(claims)
+	//
+	//} else {
+	//	fmt.Println(err)
+	//}
+	//
+	//fmt.Println(*token)
+	//fmt.Println("New-Hmac")
 	// -------------------------------------------------------------------
-	var hmacSampleSecret2 []byte
+	//var hmacSampleSecret2 []byte
+	hmacSampleSecret2 := []byte("Super$ecter123765@")
 	token2 := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"foo":                "bar",
-		"fooooooooooooooooo": time.Date(2015, 10, 10, 12, 0, 0, 0, time.UTC).Unix(),
+		"username": "valod",
+		"password": "Rembo3Rembo4",
 	})
 	tokenString2, err2 := token2.SignedString(hmacSampleSecret2)
-	fmt.Println(tokenString2, err2)
+	fmt.Println(hmacSampleSecret2, tokenString2, err2)
 
 	// -------------------------------------------------------------------
 
 	fmt.Println("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
 	fmt.Println("")
-	//https://pkg.go.dev/github.com/golang-jwt/jwt#example-New-Hmac
 }
-
-//var seeds = []string{"https://netangels.net/utils/testurl"}
-//var seed = "https://netangels.net/utils/testurl"
-//var hostlist []string
-//type hl struct {
-//	Hostlist []string
-//	sync.RWMutex
-//}
-//var hoho = hl{
-//	Hostlist: nil,
-//	RWMutex:  sync.RWMutex{},
-//}
-//func GetSeed() {
-//	for {
-//		thishosts := GetHostsByHTTP(seed)
-//		if !testEq(thishosts, hostlist) {
-//			hostlist = thishosts
-//			hoho.RWMutex.Lock()
-//			hoho.Hostlist = thishosts
-//			hoho.RWMutex.Unlock()
-//			fmt.Println("New hosts list is", hoho.Hostlist)
-//		}
-//		time.Sleep(10 * time.Second)
-//	}
-//
-//}

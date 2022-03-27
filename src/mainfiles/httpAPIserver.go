@@ -62,10 +62,32 @@ func dynconfig(w http.ResponseWriter, r *http.Request) {
 	utils.ApiConfig(r)
 }
 
+func jwtLogin(w http.ResponseWriter, r *http.Request) {
+	reqBody, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Println("JWT handler read body", err)
+	}
+	tok, er := utils.GenJWTtoken(reqBody)
+	if er != nil {
+		w.WriteHeader(501)
+		_, ee := w.Write([]byte("Error decoding JWT token"))
+		if ee != nil {
+			log.Println(ee)
+		}
+	} else {
+		w.WriteHeader(200)
+		_, ee := w.Write(tok)
+		if ee != nil {
+			log.Println(ee)
+		}
+		_, _ = w.Write([]byte("\n"))
+	}
+}
+
 func playmux0() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", dynHandler)
-
+	mux.HandleFunc("/login", jwtLogin)
 	s1 := http.Server{
 		Addr:         configs.To.HttpAddress,
 		Handler:      mux,
