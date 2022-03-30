@@ -162,43 +162,26 @@ func GenJWTtoken(in []byte) ([]byte, error) {
 	// curl -XPOST -d '{"username":"gesho", "password": "polozmukuck"}' http://127.0.0.1:8080/login
 }
 
-func CheckJWTtoken() {
-	fmt.Println("")
-	fmt.Println("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-	//fmt.Println("Parse-Hmac")
-	//hmacSampleSecret := []byte("my_secret_key")
-	//
-	//tokenString := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmb28iOiJiYXIiLCJmb29vb29vb29vb29vb29vb28iOjE0NDQ0Nzg0MDB9.AS9-OaZWBdI4DR_j_a0qcCP1xxTLFH52WudB2unZA14"
-	//token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-	//	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-	//		return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-	//	}
-	//	fmt.Println(hmacSampleSecret)
-	//	return hmacSampleSecret, nil
-	//})
-	//
-	//if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
-	//	fmt.Println(claims["foooooooooooooooo"], claims["baaaaaaaaaaaaar"])
-	//	fmt.Println(claims)
-	//
-	//} else {
-	//	fmt.Println(err)
-	//}
-	//
-	//fmt.Println(*token)
-	//fmt.Println("New-Hmac")
-	// -------------------------------------------------------------------
-	//var hmacSampleSecret2 []byte
-	hmacSampleSecret2 := []byte("Super$ecter123765@")
-	token2 := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"username": "valod",
-		"password": "Rembo3Rembo4",
+func CheckJWTtoken(tok string) bool {
+	//tok := string(to)
+	hmacSampleSecret := []byte("Super$ecter123765@")
+	token, errr := jwt.Parse(tok, func(token *jwt.Token) (interface{}, error) {
+
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+
+		return hmacSampleSecret, nil
 	})
-	tokenString2, err2 := token2.SignedString(hmacSampleSecret2)
-	fmt.Println(hmacSampleSecret2, tokenString2, err2)
+	if errr != nil {
+		fmt.Println(errr)
+		return false
 
-	// -------------------------------------------------------------------
+	} else {
+		fmt.Println(token.Valid, token.Header, token.Method, token.Claims)
+		return true
+	}
 
-	fmt.Println("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-	fmt.Println("")
 }
+
+// eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJoYXNoIjoiNmFjNDExOTNjYmE1ZjQ3MTZmYTQxOTAxNmZiZDJmYWQzZGJhY2M4MGU0ZDI5YWQ3ZTVlYjZkZjc1OTdiNTFjYiJ9.T1pvde1pF5hj1q9-xfmPyCtJj5qhxBOey4AXGSjKzS8

@@ -7,40 +7,75 @@ import (
 	"log"
 	"net/http"
 	"runtime"
+	"strings"
 	"time"
 	"utils"
 )
 
 func dynHandler(w http.ResponseWriter, r *http.Request) {
-	var fullurl string
 	if configs.To.ServerAuth {
 		if !utils.CheckAuth(w, r) {
 			return
 		}
 	}
 
+	// -- -- JWT Testing -- -- //
+	jwtheader := r.Header.Get("Authorization")
+	const unauth = http.StatusUnauthorized
+	if !strings.HasPrefix(jwtheader, "Authorization ") {
+		jwt := r.Header.Get("Authorization")
+		if !utils.CheckJWTtoken(jwt[7:]) {
+			http.Error(w, http.StatusText(unauth), unauth)
+			return
+		}
+	}
+	// -- -- JWT Testing -- -- //
+
 	switch r.Method {
 	case "POST", "GET":
-		reqBody, err := ioutil.ReadAll(r.Body)
+		//reqBody, err := ioutil.ReadAll(r.Body)
+		//if !utils.CheckJWTtoken(reqBody) {
+		//	w.WriteHeader(http.StatusUnauthorized)
+		//	w.Write([]byte("Fuck off\n"))
+		//	return
+		//}
+		//if err != nil {
+		//	log.Println(err)
+		//}
+		//switch r.TLS {
+		//case nil:
+		//	fullurl = "http://" + r.Host + r.RequestURI
+		//	//host = "http://" + r.Host
+		//default:
+		//	fullurl = "https://" + r.Host + r.RequestURI
+		//	//host = "https://" + r.Host
+		//}
+		//m := make(map[string][]byte)
+		//m[fullurl] = reqBody
+		//fmt.Println("Host:      ", r.Host)
+		//fmt.Println("RawQuery:  ", r.URL.RawQuery)
+		//fmt.Println("URL:       ", r.URL)
+		//fmt.Println("URL.Path:  ", r.URL.Path)
+		//fmt.Println("RequestURI:", r.RequestURI)
+		//fmt.Println("URL.String:", r.URL.String())
+		//fmt.Println("FullURL:   ", fullurl)
+		//status, body, err := PostData(m, r.Method)
+		//status, body, err := ProcessData(fullurl, reqBody, r.Method)
+		status, body, err := ProcessData(r)
 		if err != nil {
-			log.Println(err)
+			w.WriteHeader(status)
+			_, be := w.Write([]uint8("500 Internal server error\n"))
+			if be != nil {
+				log.Println(be)
+			}
 		}
-		switch r.TLS {
-		case nil:
-			fullurl = "http://" + r.Host + r.URL.Path
-		default:
-			fullurl = "https://" + r.Host + r.URL.Path
-		}
-		m := make(map[string][]byte)
-		m[fullurl] = reqBody
-		status, body, err := PostData(m, r.Method)
 		w.WriteHeader(status)
 		_, ee := w.Write(body)
 		if ee != nil {
 			log.Println(ee)
 		}
 		if configs.To.Accesslog {
-			log.Println(r.Proto, r.RemoteAddr, r.Method, fullurl)
+			log.Println(r.Proto, r.RemoteAddr, r.Method, r.Host+r.RequestURI)
 		}
 	default:
 		w.WriteHeader(501)
@@ -61,7 +96,6 @@ func dynconfig(w http.ResponseWriter, r *http.Request) {
 	}
 	utils.ApiConfig(r)
 }
-
 func jwtLogin(w http.ResponseWriter, r *http.Request) {
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -69,8 +103,8 @@ func jwtLogin(w http.ResponseWriter, r *http.Request) {
 	}
 	tok, er := utils.GenJWTtoken(reqBody)
 	if er != nil {
-		w.WriteHeader(501)
-		_, ee := w.Write([]byte("Error decoding JWT token"))
+		w.WriteHeader(503)
+		_, ee := w.Write([]byte("Error decoding JWT token\n"))
 		if ee != nil {
 			log.Println(ee)
 		}
