@@ -3,7 +3,6 @@ package utils
 import (
 	"configs"
 	"crypto/sha256"
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -46,7 +45,6 @@ func RetRandom(input []string) string {
 }
 
 func CheckAuth(w http.ResponseWriter, r *http.Request) bool {
-
 	const unauth = http.StatusUnauthorized
 
 	switch {
@@ -58,29 +56,33 @@ func CheckAuth(w http.ResponseWriter, r *http.Request) bool {
 			http.Error(w, http.StatusText(unauth), unauth)
 			return false
 		}
+	case configs.To.JWTAuth:
+		jwthdr := strings.Split(r.Header.Get("Authorization"), " ")
+		if CheckJWTtoken(jwthdr[len(jwthdr)-1]) {
+			return true
+		} else {
+			http.Error(w, http.StatusText(unauth), unauth)
+			log.Print("Invalid JWT authorization:")
+
+			return false
+		}
 	case configs.To.BasicAuth:
-		authorized := configs.To.BasicCreds
-		basicAuth := r.Header.Get("Authorization")
 
-		if !strings.HasPrefix(basicAuth, "Basic ") {
-			log.Print("Invalid authorization:", basicAuth)
+		username, password, ok := r.BasicAuth()
+		if ok {
+			if username+":"+password == configs.To.BasicCreds {
+				return true
+			} else {
+				log.Print("Invalid authorization:")
+				http.Error(w, http.StatusText(unauth), unauth)
+				return false
+			}
+
+		} else {
+			log.Print("Invalid authorization:")
 			http.Error(w, http.StatusText(unauth), unauth)
 			return false
 		}
-
-		up, err := base64.StdEncoding.DecodeString(basicAuth[6:])
-		if err != nil {
-			log.Print("authorization decode error:", err)
-			http.Error(w, http.StatusText(unauth), unauth)
-			return false
-		}
-		if string(up) != authorized {
-			http.Error(w, http.StatusText(unauth), unauth)
-			log.Print("authorization decode error:", err)
-
-			return false
-		}
-		return true
 	default:
 		return false
 	}
@@ -164,8 +166,9 @@ func GenJWTtoken(in []byte) ([]byte, error) {
 
 func CheckJWTtoken(tok string) bool {
 	//tok := string(to)
-	hmacSampleSecret := []byte("Super$ecter123765@")
-	token, errr := jwt.Parse(tok, func(token *jwt.Token) (interface{}, error) {
+	//hmacSampleSecret := []byte("Super$ecter123765@")
+	hmacSampleSecret := configs.To.JWTSecret
+	_, errr := jwt.Parse(tok, func(token *jwt.Token) (interface{}, error) {
 
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -178,7 +181,7 @@ func CheckJWTtoken(tok string) bool {
 		return false
 
 	} else {
-		fmt.Println(token.Valid, token.Header, token.Method, token.Claims)
+		//fmt.Println(token.Valid, token.Header, token.Method, token.Claims)
 		return true
 	}
 

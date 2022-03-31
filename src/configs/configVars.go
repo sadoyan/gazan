@@ -23,7 +23,10 @@ type confVars struct {
 	Healtchecks         int
 	ServerAuth          bool
 	BasicAuth           bool
+	ApiKeyAuth          bool
+	JWTAuth             bool
 	ApiKey              string
+	JWTSecret           []byte
 	BasicCreds          string
 	ClientAuth          bool
 	ClientUser          string
@@ -35,11 +38,11 @@ type confVars struct {
 	Clientimeout        time.Duration
 	Monenabled          bool
 	Monurl              string
+	UpstreamsFile       string
+	Accesslog           bool
 	//Monuser       string
 	//Monpass       string
-	UpstreamsFile string
-	Accesslog     bool
-	ApiKeyAuth    bool
+
 }
 
 var To = &confVars{
@@ -47,6 +50,7 @@ var To = &confVars{
 	Healtchecks:         20,
 	ServerAuth:          false,
 	BasicAuth:           false,
+	JWTAuth:             false,
 	ApiKeyAuth:          false,
 	BasicCreds:          "",
 	ClientAuth:          false,
@@ -59,12 +63,13 @@ var To = &confVars{
 	Clienidletimeout:    90 * time.Second,
 	Clientimeout:        time.Second * 10,
 	Monurl:              "127.0.0.1:9191",
+	UpstreamsFile:       "",
+	Accesslog:           false,
+	ApiKey:              os.Getenv("GAZANKEY"),
+	JWTSecret:           []byte(os.Getenv("JWTSECRET")),
 	//Monuser:       "",
 	//Monpass:       "",
-	UpstreamsFile: "",
-	Accesslog:     false,
 
-	ApiKey: os.Getenv("GAZANKEY"),
 }
 
 //var Authorized = make(map[string]string, 10)
@@ -112,6 +117,7 @@ func SetVarsik() {
 		To.ServerAuth = false
 		To.ApiKeyAuth = false
 		To.BasicAuth = false
+		To.JWTAuth = false
 	case "apikey":
 		if os.Getenv("GAZANKEY") == "" {
 			log.Println("\n\n Api-Key authentication is enable but Key is not set \n Please set OS enviroment variable GAZANKEY to your api key\n")
@@ -120,6 +126,7 @@ func SetVarsik() {
 		To.ServerAuth = true
 		To.ApiKeyAuth = true
 		To.BasicAuth = false
+		To.JWTAuth = false
 	case "basic":
 		if os.Getenv("BASICUSER") == "" && os.Getenv("BASICPASS") == "" {
 			log.Println("\n\n Basic authentication is enable but user:password are not set \n Please set OS enviroment variable BASICUSER and  BASICPASS\n")
@@ -128,8 +135,18 @@ func SetVarsik() {
 		To.ServerAuth = true
 		To.ApiKeyAuth = false
 		To.BasicAuth = true
+		To.JWTAuth = false
 		To.BasicCreds = os.Getenv("BASICUSER") + ":" + os.Getenv("BASICPASS")
 		//Authorized["server"] = os.Getenv("BASICUSER") + ":" + os.Getenv("BASICPASS")
+	case "jwt":
+		if os.Getenv("JWTSECRET") == "" {
+			log.Println("\n\n JWT authentication is enable but SECRET is not set \n Please set OS enviroment variable JWTSECRET to your JWT secret\n")
+			os.Exit(2)
+		}
+		To.ServerAuth = true
+		To.ApiKeyAuth = false
+		To.BasicAuth = false
+		To.JWTAuth = true
 	default:
 		log.Println("Unknown authentication parameter")
 		os.Exit(2)

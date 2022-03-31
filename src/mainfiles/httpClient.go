@@ -89,7 +89,6 @@ var qstring string
 
 func ProcessData(r *http.Request) (int, []uint8, error) {
 	data, err := ioutil.ReadAll(r.Body)
-
 	// Think baout this !
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
@@ -97,13 +96,11 @@ func ProcessData(r *http.Request) (int, []uint8, error) {
 
 		}
 	}(r.Body)
-	// --------------
-
 	if err != nil {
 		log.Println(err)
 		return 500, []uint8("500 Internal server error\n"), err
 	}
-	//fmt.Println("Data:", string(data))
+
 	switch r.TLS {
 	case nil:
 		protohost = "http://" + r.Host
@@ -121,10 +118,9 @@ func ProcessData(r *http.Request) (int, []uint8, error) {
 	}
 
 	veq, e := utils.RetRandomMap(key)
+
 	if e == nil {
 		req, histeric := http.NewRequest(r.Method, veq, bytes.NewReader(data))
-		//req, histeric := http.NewRequestWithContext(traceCtx, http.MethodPost, veq, bytes.NewReader(v))
-
 		if histeric != nil {
 			log.Println("Error connecting To Upstream:", veq)
 			return 500, []uint8("500 Internal server error\n"), histeric
@@ -133,20 +129,16 @@ func ProcessData(r *http.Request) (int, []uint8, error) {
 			req.SetBasicAuth(configs.To.ClientUser, configs.To.ClientPass)
 		}
 		req.Header.Add("Content-Length", strconv.Itoa(len(data)))
-		//resp, err := http.DefaultClient.Do(req)
 		resp, err := client.Do(req)
-		// - - - - - - - - - - - - - - - - - - - - - - -
 		if err != nil {
 			log.Println("Dead upstream:", err)
 			time.Sleep(2 * time.Second)
 			return 500, nil, err
 		}
-
 		buf, buerr := ioutil.ReadAll(resp.Body)
 		if buerr != nil {
 			log.Println("clientient read body error", buerr)
 		}
-
 		if !(resp.StatusCode >= 200 && resp.StatusCode < 300) {
 			log.Println("Dead upstream:", err)
 			time.Sleep(2 * time.Second)
@@ -157,11 +149,7 @@ func ProcessData(r *http.Request) (int, []uint8, error) {
 			_ = resp.Body.Close()
 			return resp.StatusCode, buf, nil
 		}
-
-		//_ = resp.Body.Close()
 	} else {
 		return 503, []uint8("503 Service Unavailable"), e
-		//log.Println(e)
 	}
-
 }
