@@ -89,6 +89,7 @@ var qstring string
 
 func ProcessData(r *http.Request) (int, []uint8, error) {
 	data, err := ioutil.ReadAll(r.Body)
+
 	// Think baout this !
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
@@ -128,7 +129,8 @@ func ProcessData(r *http.Request) (int, []uint8, error) {
 		if configs.To.ClientAuth {
 			req.SetBasicAuth(configs.To.ClientUser, configs.To.ClientPass)
 		}
-		req.Header.Add("Content-Length", strconv.Itoa(len(data)))
+		//req.Header.Add("Content-Length", strconv.Itoa(len(data)))
+		req.Header = r.Header
 		resp, err := client.Do(req)
 		if err != nil {
 			log.Println("Dead upstream:", err)
