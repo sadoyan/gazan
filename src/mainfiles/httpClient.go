@@ -37,7 +37,6 @@ var qstring string
 
 func ProcessData(r *http.Request) (int, []uint8, error) {
 	data, err := ioutil.ReadAll(r.Body)
-
 	ip, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err == nil {
 		r.Header.Add("X-FORWARDED-FOR", ip)
@@ -84,8 +83,17 @@ func ProcessData(r *http.Request) (int, []uint8, error) {
 			req.SetBasicAuth(configs.To.ClientUser, configs.To.ClientPass)
 		}
 		//req.Header.Add("Content-Length", strconv.Itoa(len(data)))
+
 		req.Header = r.Header
+
+		// - - - - - - - - - - - - - - - - - - - - - - - //
+		req.Host = r.Host
+		fmt.Println("URL Host:", req.URL.Host)
+		fmt.Println("Host:", req.Host)
+		// - - - - - - - - - - - - - - - - - - - - - - - //
+
 		resp, err := client.Do(req)
+
 		if err != nil {
 			log.Println("Dead upstream:", err)
 			time.Sleep(2 * time.Second)
