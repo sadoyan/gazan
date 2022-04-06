@@ -12,6 +12,7 @@ import (
 )
 
 func dynHandler(w http.ResponseWriter, r *http.Request) {
+	c.inc()
 
 	if configs.To.ServerAuth {
 		if !utils.CheckAuth(w, r) {
@@ -19,7 +20,9 @@ func dynHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	switch r.Method {
+
 	case "POST", "GET":
+
 		status, body, err := ProcessData(r)
 		if err != nil {
 			w.WriteHeader(status)
@@ -29,6 +32,7 @@ func dynHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		//w.WriteHeader(status)
+
 		_, ee := w.Write(body)
 		if ee != nil {
 			log.Println("HTTP basic error:", ee)
