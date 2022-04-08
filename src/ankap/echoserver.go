@@ -19,6 +19,7 @@ func mxhandl(w http.ResponseWriter, r *http.Request) {
 		for ck, cv := range r.Cookies() {
 			fmt.Println(ck, cv)
 		}
+		fmt.Println(r.URL)
 		fmt.Println("")
 	}
 

@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"reflect"
+	"strings"
 	"time"
 )
 
@@ -70,6 +71,9 @@ func LoadUpstreamsFronFIle(up string) {
 	} else {
 		er := json.Unmarshal(data, &Dconf.Upstreams)
 		for k, v := range Dconf.Upstreams {
+			if !strings.Contains(k, "/") {
+				Dconf.Windcards[k] = true
+			}
 			Dconf.Constants[k] = v
 			for vv := range v {
 				fmt.Println("Registering URL", k, "To Upstream:", v[vv])
@@ -83,7 +87,6 @@ func LoadUpstreamsFronFIle(up string) {
 			log.Println("Error decoding default upstreams list")
 		}
 	}
-
 }
 
 func Valod(healtchecks int) {

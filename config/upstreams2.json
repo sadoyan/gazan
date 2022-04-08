@@ -1,20 +1,21 @@
 {
-    "http://pastor:8080/pooz": [
-        "http://192.168.10.1:8000/poloz"
-    ],
-    "http://127.0.0.1:8080/mukuch": [
-        "http://192.168.10.1:8000/mukuch",
-        "http://dwarf.netangels.loc:8000/mukuch"
-    ],
-    "http://192.168.10.10:8080/jivan": [
-        "http://gnome:8000/jivan",
-        "http://dwarf:8000/jivan"
-    ],
-    "http://192.168.10.10:8080/valer": [
-        "http://127.0.0.1:8000/valer",
-        "http://192.168.10.10:8000/valer",
-        "http://192.168.10.10:8000/chmod",
-        "http://192.168.10.10:8000/xxxxx",
-        "http://192.168.10.10:8000/yyyyy"
-    ]
+  "192.168.10.10:8080": [
+    "http://dwarf:8000",
+    "http://192.168.10.1:8000"
+  ],
+  "http://pastor:8080/write": [
+    "http://dwarf:8000"
+  ],
+  "http://pastor:8080/pooz": [
+    "http://192.168.10.1:8000",
+    "http://dwarf:8000"
+  ],
+  "http://127.0.0.1:8080/mukuch": [
+    "http://192.168.10.1:8000",
+    "http://dwarf.netangels.loc:8000"
+  ],
+  "http://192.168.10.10:8080/jivan": [
+    "http://gnome:8000",
+    "http://dwarf:8000"
+  ]
 }

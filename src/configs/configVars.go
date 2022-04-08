@@ -108,7 +108,7 @@ func SetVarsik() {
 	To.Monurl = cfg.Section("monitoring").Key("url").String()
 	//To.Monuser = cfg.Section("monitoring").Key("user").String()
 	//To.Monpass = cfg.Section("monitoring").Key("pass").String()
-	To.Accesslog = strtoBool(cfg.Section("server").Key("Accesslog").String())
+	To.Accesslog = strtoBool(cfg.Section("server").Key("accesslog").String())
 	//Authorized["mon"] = To.Monuser + ":" + To.Monpass
 
 	authtype := cfg.Section("server").Key("authtype").String()
