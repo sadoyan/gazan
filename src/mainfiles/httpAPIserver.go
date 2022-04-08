@@ -32,10 +32,11 @@ func dynHandler(w http.ResponseWriter, r *http.Request) {
 				log.Println(be)
 			}
 		}
-		fmt.Println(" - - - - - -")
 		for k, v := range headers {
-			fmt.Println(k, v[0])
-			w.Header().Add(k, v[0])
+			for hlen := range v {
+				w.Header().Add(k, v[hlen])
+			}
+
 		}
 
 		_, ee := w.Write(body)

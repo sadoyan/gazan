@@ -90,16 +90,11 @@ func ProcessData(r *http.Request) (int, []uint8, http.Header, error) {
 		if configs.To.ClientAuth {
 			req.SetBasicAuth(configs.To.ClientUser, configs.To.ClientPass)
 		}
-		//req.Header.Add("Content-Length", strconv.Itoa(len(data)))
 
 		req.Header = r.Header
-		// - - - - - - - - - - - - - - - - - - - - - - - //
 		req.Host = r.Host
-		//fmt.Println(r.URL.Path, req.URL)
-		//fmt.Println("URL Host:", req.URL.Host, "Host:", req.Host)
-		// - - - - - - - - - - - - - - - - - - - - - - - //
 		resp, err := client.Do(req)
-		//fmt.Println(req.Response, resp.StatusCode)
+
 		if err != nil {
 			log.Println("Dead upstream:", err)
 			time.Sleep(2 * time.Second)
