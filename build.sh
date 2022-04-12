@@ -14,3 +14,8 @@ go build -o /tmp/Gazan src/start.go
 
 reflex -d none -r '.'  -s -- sh -c  'go run src/start.go -config config.ini -up=config/upstreams.json'
 #reflex -d fancy -r '.'  -s -- sh -c  'go run src/start.go -up=config/upstreams.json'
+
+
+
+
+# curl -XPOST -u 'test:Te$ting' --data-binary @config/upstreams.json 127.0.0.1:4141/config?cfg=new

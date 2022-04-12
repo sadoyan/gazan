@@ -23,7 +23,7 @@ func dynHandler(w http.ResponseWriter, r *http.Request) {
 
 	case "POST", "GET":
 
-		status, body, headers, err := ProcessData(r)
+		status, body, headers, err := ProcessData(r, w)
 		if err != nil {
 
 			w.WriteHeader(status)
@@ -38,7 +38,6 @@ func dynHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 		}
-
 		_, ee := w.Write(body)
 		if ee != nil {
 			log.Println("HTTP basic error:", ee)

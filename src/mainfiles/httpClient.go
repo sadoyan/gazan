@@ -1,6 +1,7 @@
 package mainfiles
 
 import (
+	"bufio"
 	"bytes"
 	"configs"
 	"fmt"
@@ -35,7 +36,7 @@ var protohost string
 var key string
 var qstring string
 
-func ProcessData(r *http.Request) (int, []uint8, http.Header, error) {
+func ProcessData(r *http.Request, w http.ResponseWriter) (int, []uint8, http.Header, error) {
 	data, err := ioutil.ReadAll(r.Body)
 	ip, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err == nil {
@@ -99,6 +100,23 @@ func ProcessData(r *http.Request) (int, []uint8, http.Header, error) {
 			log.Println("Dead upstream:", err)
 			time.Sleep(2 * time.Second)
 			return 500, nil, nil, err
+		}
+		if resp.ContentLength > 1048576 {
+			scanner := bufio.NewScanner(resp.Body)
+			scanner.Split(bufio.ScanBytes)
+			for k, v := range resp.Header {
+				for x, _ := range v {
+					w.Header().Add(k, v[x])
+				}
+			}
+			for scanner.Scan() {
+				_, ee := w.Write(scanner.Bytes())
+				if ee != nil {
+					log.Println("Error downloading big file", ee)
+					return 503, []uint8("500 Service Unavailable"), nil, ee
+				}
+			}
+			return resp.StatusCode, nil, nil, nil
 		}
 		buf, buerr := ioutil.ReadAll(resp.Body)
 		if buerr != nil {
