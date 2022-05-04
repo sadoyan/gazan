@@ -3,11 +3,12 @@ package configs
 import (
 	"flag"
 	"fmt"
-	"gopkg.in/ini.v1"
 	"log"
 	"os"
 	"strings"
 	"time"
+
+	"gopkg.in/ini.v1"
 )
 
 func strtoBool(in string) bool {
@@ -40,6 +41,7 @@ type confVars struct {
 	Monurl              string
 	UpstreamsFile       string
 	Accesslog           bool
+	Confurl             string
 	//Monuser       string
 	//Monpass       string
 
@@ -63,6 +65,7 @@ var To = &confVars{
 	Clienidletimeout:    90 * time.Second,
 	Clientimeout:        time.Second * 10,
 	Monurl:              "127.0.0.1:9191",
+	Confurl:             "127.0.0.1:4141",
 	UpstreamsFile:       "",
 	Accesslog:           false,
 	ApiKey:              os.Getenv("GAZANKEY"),
@@ -106,6 +109,7 @@ func SetVarsik() {
 
 	To.Monenabled, _ = cfg.Section("monitoring").Key("enabled").Bool()
 	To.Monurl = cfg.Section("monitoring").Key("url").String()
+	To.Confurl = cfg.Section("main").Key("confurl").String()
 	//To.Monuser = cfg.Section("monitoring").Key("user").String()
 	//To.Monpass = cfg.Section("monitoring").Key("pass").String()
 	To.Accesslog = strtoBool(cfg.Section("server").Key("accesslog").String())

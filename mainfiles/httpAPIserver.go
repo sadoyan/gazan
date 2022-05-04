@@ -105,11 +105,12 @@ func playmux1() {
 	mux1.HandleFunc("/", mxhandl)
 
 	s2 := http.Server{
-		Addr:         "127.0.0.1:9191",
+		Addr:         configs.To.Monurl,
 		Handler:      mux1,
 		ReadTimeout:  100 * time.Second,
 		WriteTimeout: 100 * time.Second,
 	}
+	fmt.Println(s2.Addr)
 	_ = s2.ListenAndServe()
 
 }
@@ -118,7 +119,7 @@ func playmux2() {
 	mux2.HandleFunc("/config", dynconfig)
 
 	s3 := http.Server{
-		Addr:         "127.0.0.1:4141",
+		Addr:         configs.To.Confurl,
 		Handler:      mux2,
 		ReadTimeout:  100 * time.Second,
 		WriteTimeout: 100 * time.Second,
