@@ -1,0 +1,24 @@
+{
+  "apt.netangels.net:8080": [
+    "http://blue"
+  ],
+  "192.168.10.10:8080": [
+    "http://192.168.10.1:8000",
+    "http://dwarf:8000"
+  ],
+  "pastor:8080/write": [
+    "http://dwarf:8000"
+  ],
+  "pastor:8080/pooz": [
+    "http://192.168.10.1:8000",
+    "http://dwarf:8000"
+  ],
+  "127.0.0.1:8080/mukuch": [
+    "http://192.168.10.1:8000",
+    "http://dwarf.netangels.loc:8000"
+  ],
+  "192.168.10.10:8080/jivan": [
+    "http://gnome:8000",
+    "http://dwarf:8000"
+  ]
+}
