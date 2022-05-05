@@ -1,21 +1,25 @@
 {
-  "192.168.10.10:8080": [
+  "preacher.netangels.net:8443": [
     "http://192.168.10.1:8000",
     "http://dwarf:8000"
   ],
-  "pastor:8080/write": [
+  "pastor.netangels.net:8443/write": [
     "http://dwarf:8000"
   ],
-  "pastor:8080/pooz": [
+  "pastor.netangels.net:8443/pooz": [
     "http://192.168.10.1:8000",
     "http://dwarf:8000"
   ],
-  "127.0.0.1:8080/mukuch": [
+  "preacher.netangels.net:8443/mukuch": [
     "http://192.168.10.1:8000",
     "http://dwarf.netangels.loc:8000"
   ],
-  "192.168.10.10:8080/jivan": [
+  "preacher.netangels.net:8443/jivan": [
     "http://gnome:8000",
+    "http://dwarf:8000"
+  ],
+  "pastor.netangels.net:8443": [
+    "http://192.168.10.1:8000",
     "http://dwarf:8000"
   ]
 }

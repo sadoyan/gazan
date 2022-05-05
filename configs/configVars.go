@@ -21,6 +21,9 @@ func strtoBool(in string) bool {
 
 type confVars struct {
 	HttpAddress         string
+	TLSEnabled          bool
+	TLSCertFIle         string
+	TLSPrivKey          string
 	Healtchecks         int
 	ServerAuth          bool
 	BasicAuth           bool
@@ -49,6 +52,9 @@ type confVars struct {
 
 var To = &confVars{
 	HttpAddress:         "127.0.0.1:8080",
+	TLSEnabled:          false,
+	TLSCertFIle:         "",
+	TLSPrivKey:          "",
 	Healtchecks:         20,
 	ServerAuth:          false,
 	BasicAuth:           false,
@@ -91,8 +97,11 @@ func SetVarsik() {
 	To.UpstreamsFile = *up
 	To.HttpAddress = cfg.Section("main").Key("listen").String()
 
-	To.Healtchecks, _ = cfg.Section("main").Key("dispatchers").Int()
+	To.TLSEnabled = strtoBool(cfg.Section("tls").Key("enbaled").String())
+	To.TLSCertFIle = cfg.Section("tls").Key("certificate").String()
+	To.TLSPrivKey = cfg.Section("tls").Key("privatekey").String()
 
+	To.Healtchecks, _ = cfg.Section("main").Key("dispatchers").Int()
 	To.ServerAuth, _ = cfg.Section("server").Key("serverauth").Bool()
 
 	To.ClientAuth, _ = cfg.Section("client").Key("clientauth").Bool()
@@ -156,4 +165,5 @@ func SetVarsik() {
 		os.Exit(2)
 	}
 	fmt.Println("Authentication enabled:", authtype)
+
 }

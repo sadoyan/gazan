@@ -1,3 +1,4 @@
+
 {
   "apt.netangels.net:8080": [
     "http://blue"
@@ -20,5 +21,10 @@
   "192.168.10.10:8080/jivan": [
     "http://gnome:8000",
     "http://dwarf:8000"
+  ],
+  "pastor.netangels.net:8443": [
+    "http://192.168.10.1:8000",
+    "http://dwarf:8000"
   ]
 }
+

@@ -128,6 +128,19 @@ func playmux2() {
 
 }
 
+func serveTLS() {
+	muxTLS := http.NewServeMux()
+	muxTLS.HandleFunc("/", dynHandler)
+	muxTLS.HandleFunc("/login", jwtLogin)
+	sTLS := http.Server{
+		Addr:         "0.0.0.0:8443",
+		Handler:      muxTLS,
+		ReadTimeout:  100 * time.Second,
+		WriteTimeout: 100 * time.Second,
+	}
+	_ = sTLS.ListenAndServeTLS("/tmp/fullchain.cer", "/tmp/netangels.net.key")
+}
+
 func RunServer() {
 	configs.SetVarsik()
 	http.HandleFunc("/", dynHandler)
@@ -140,6 +153,8 @@ func RunServer() {
 	log.Print("Started Proxy ")
 	runtime.Gosched()
 	go playmux0()
+	go serveTLS()
+
 	time.Sleep(time.Second)
 	utils.LoadUpstreamsFronFIle(configs.To.UpstreamsFile)
 	forever := make(chan bool)
