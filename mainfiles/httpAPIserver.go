@@ -138,7 +138,7 @@ func serveTLS() {
 		ReadTimeout:  100 * time.Second,
 		WriteTimeout: 100 * time.Second,
 	}
-	_ = sTLS.ListenAndServeTLS("/tmp/fullchain.cer", "/tmp/netangels.net.key")
+	_ = sTLS.ListenAndServeTLS(configs.To.TLSCertFIle, configs.To.TLSPrivKey)
 }
 
 func RunServer() {
@@ -153,7 +153,10 @@ func RunServer() {
 	log.Print("Started Proxy ")
 	runtime.Gosched()
 	go playmux0()
-	go serveTLS()
+
+	if configs.To.TLSEnabled {
+		go serveTLS()
+	}
 
 	time.Sleep(time.Second)
 	utils.LoadUpstreamsFronFIle(configs.To.UpstreamsFile)
