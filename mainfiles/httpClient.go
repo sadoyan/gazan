@@ -97,7 +97,7 @@ func ProcessData(r *http.Request, w http.ResponseWriter) (int, []uint8, http.Hea
 			scanner := bufio.NewScanner(resp.Body)
 			scanner.Split(bufio.ScanBytes)
 			for k, v := range resp.Header {
-				for x, _ := range v {
+				for x := range v {
 					w.Header().Add(k, v[x])
 				}
 			}
