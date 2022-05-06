@@ -2,6 +2,8 @@ package mainfiles
 
 import (
 	"configs"
+	"crypto/x509"
+	"encoding/pem"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -110,9 +112,8 @@ func playmux1() {
 		ReadTimeout:  100 * time.Second,
 		WriteTimeout: 100 * time.Second,
 	}
-	fmt.Println(s2.Addr)
+	fmt.Println("Starting monitoring at:", configs.To.Monurl)
 	_ = s2.ListenAndServe()
-
 }
 func playmux2() {
 	mux2 := http.NewServeMux()
@@ -124,6 +125,7 @@ func playmux2() {
 		ReadTimeout:  100 * time.Second,
 		WriteTimeout: 100 * time.Second,
 	}
+	fmt.Println("Starting server at:", configs.To.HttpAddress)
 	_ = s3.ListenAndServe()
 
 }
@@ -133,31 +135,53 @@ func serveTLS() {
 	muxTLS.HandleFunc("/", dynHandler)
 	muxTLS.HandleFunc("/login", jwtLogin)
 	sTLS := http.Server{
-		Addr:         "0.0.0.0:8443",
+		Addr:         configs.To.TLSAddress,
 		Handler:      muxTLS,
 		ReadTimeout:  100 * time.Second,
 		WriteTimeout: 100 * time.Second,
 	}
+
+	r, e1 := ioutil.ReadFile(configs.To.TLSCertFIle)
+	block, _ := pem.Decode(r)
+
+	if e1 != nil {
+		log.Fatal("Error loading certificate file:", e1)
+	}
+
+	_, err := x509.ParseCertificate(block.Bytes)
+	if err != nil {
+		log.Fatal("Invalid Certificate file:", err)
+	}
+
+	v, e3 := ioutil.ReadFile(configs.To.TLSPrivKey)
+	if e3 != nil {
+		log.Fatal("Error loading private key file:", e3)
+	}
+
+	b, _ := pem.Decode(v)
+
+	_, er := x509.ParsePKCS1PrivateKey(b.Bytes)
+	if er != nil {
+		log.Fatal("Invalid private key file", er)
+	}
+	fmt.Println("Starting TLS server at:", configs.To.TLSAddress)
 	_ = sTLS.ListenAndServeTLS(configs.To.TLSCertFIle, configs.To.TLSPrivKey)
 }
 
 func RunServer() {
 	configs.SetVarsik()
 	http.HandleFunc("/", dynHandler)
-	fmt.Println("starting server at: " + configs.To.HttpAddress)
 
 	if configs.To.Monenabled {
 		go playmux1()
 	}
 	go playmux2()
-	log.Print("Started Proxy ")
 	runtime.Gosched()
 	go playmux0()
 
 	if configs.To.TLSEnabled {
 		go serveTLS()
 	}
-
 	time.Sleep(time.Second)
 	utils.LoadUpstreamsFronFIle(configs.To.UpstreamsFile)
 	forever := make(chan bool)
