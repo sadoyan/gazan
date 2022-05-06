@@ -22,7 +22,6 @@ func dynHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	switch r.Method {
-
 	case "POST", "GET":
 
 		status, body, headers, err := ProcessData(r, w)

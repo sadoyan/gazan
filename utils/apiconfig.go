@@ -133,3 +133,6 @@ func Valod(healtchecks int) {
 	}
 
 }
+
+// curl -XPOST -u 'test:Te$ting' --data-binary @/tmp/balod.json 127.0.0.1:4141/config?cfg=new
+// curl -XPOST -u 'test:Te$ting' --data-binary @/tmp/valod.json 127.0.0.1:4141/config?cfg=append
