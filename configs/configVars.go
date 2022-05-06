@@ -22,6 +22,7 @@ func strtoBool(in string) bool {
 type confVars struct {
 	HttpAddress         string
 	TLSEnabled          bool
+	TLSAddress          string
 	TLSCertFIle         string
 	TLSPrivKey          string
 	Healtchecks         int
@@ -53,6 +54,7 @@ type confVars struct {
 var To = &confVars{
 	HttpAddress:         "127.0.0.1:8080",
 	TLSEnabled:          false,
+	TLSAddress:          "127.0.0.1:8443",
 	TLSCertFIle:         "",
 	TLSPrivKey:          "",
 	Healtchecks:         20,
@@ -87,7 +89,7 @@ func SetVarsik() {
 	up := flag.String("up", "", "up")
 	cfgFile := flag.String("config", "config.ini", "a string")
 	flag.Parse()
-	fmt.Println("Using :", *cfgFile, "as config file")
+	log.Println("Using :", *cfgFile, "as config file")
 
 	cfg, err := ini.Load(*cfgFile)
 	if err != nil {
@@ -98,8 +100,11 @@ func SetVarsik() {
 	To.HttpAddress = cfg.Section("main").Key("listen").String()
 
 	To.TLSEnabled = strtoBool(cfg.Section("tls").Key("enbaled").String())
-	To.TLSCertFIle = cfg.Section("tls").Key("certificate").String()
-	To.TLSPrivKey = cfg.Section("tls").Key("privatekey").String()
+	if To.TLSEnabled {
+		To.TLSCertFIle = cfg.Section("tls").Key("certificate").String()
+		To.TLSPrivKey = cfg.Section("tls").Key("privatekey").String()
+		To.TLSAddress = cfg.Section("tls").Key("listen").String()
+	}
 
 	To.Healtchecks, _ = cfg.Section("main").Key("dispatchers").Int()
 	To.ServerAuth, _ = cfg.Section("server").Key("serverauth").Bool()
@@ -133,7 +138,7 @@ func SetVarsik() {
 		To.JWTAuth = false
 	case "apikey":
 		if os.Getenv("GAZANKEY") == "" {
-			log.Println("\n\n Api-Key authentication is enable but Key is not set \n Please set OS enviroment variable GAZANKEY to your api key\n")
+			log.Print("\n\n\n Api-Key authentication is enable but Key is not set \n Please set OS enviroment variable GAZANKEY to your api key\n\n")
 			os.Exit(2)
 		}
 		To.ServerAuth = true
@@ -142,7 +147,7 @@ func SetVarsik() {
 		To.JWTAuth = false
 	case "basic":
 		if os.Getenv("BASICUSER") == "" && os.Getenv("BASICPASS") == "" {
-			log.Println("\n\n Basic authentication is enable but user:password are not set \n Please set OS enviroment variable BASICUSER and  BASICPASS\n")
+			log.Print("\n\n\n Basic authentication is enable but user:password are not set \n Please set OS enviroment variable BASICUSER and  BASICPASS\n\n")
 			os.Exit(2)
 		}
 		To.ServerAuth = true
@@ -150,10 +155,9 @@ func SetVarsik() {
 		To.BasicAuth = true
 		To.JWTAuth = false
 		To.BasicCreds = os.Getenv("BASICUSER") + ":" + os.Getenv("BASICPASS")
-		//Authorized["server"] = os.Getenv("BASICUSER") + ":" + os.Getenv("BASICPASS")
 	case "jwt":
 		if os.Getenv("JWTSECRET") == "" {
-			log.Println("\n\n JWT authentication is enable but SECRET is not set \n Please set OS enviroment variable JWTSECRET to your JWT secret\n")
+			log.Print("\n\n\n JWT authentication is enable but SECRET is not set \n Please set OS enviroment variable JWTSECRET to your JWT secret\n\n")
 			os.Exit(2)
 		}
 		To.ServerAuth = true
@@ -164,6 +168,6 @@ func SetVarsik() {
 		log.Println("Unknown authentication parameter")
 		os.Exit(2)
 	}
-	fmt.Println("Authentication enabled:", authtype)
+	log.Println("Authentication enabled:", authtype)
 
 }
