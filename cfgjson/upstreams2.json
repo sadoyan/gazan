@@ -1,7 +1,6 @@
 {
   "preacher.netangels.net:8443": [
-    "http://192.168.10.1:8000",
-    "http://dwarf:8000"
+    "https://git.netangels.net"
   ],
   "pastor.netangels.net:8443/write": [
     "http://dwarf:8000"

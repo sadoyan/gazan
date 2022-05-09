@@ -4,15 +4,12 @@ import (
 	"bufio"
 	"bytes"
 	"configs"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
 	"strings"
 	"time"
 	"utils"
@@ -132,43 +129,104 @@ func ProcessData(r *http.Request, w http.ResponseWriter) (int, []uint8, http.Hea
 	}
 }
 
-func NewProxy(targetHost string) (*httputil.ReverseProxy, error) {
-	url, err := url.Parse(targetHost)
-	if err != nil {
-		return nil, err
-	}
-
-	proxy := httputil.NewSingleHostReverseProxy(url)
-
-	originalDirector := proxy.Director
-	proxy.Director = func(req *http.Request) {
-		originalDirector(req)
-		modifyRequest(req)
-	}
-
-	proxy.ModifyResponse = modifyResponse()
-	proxy.ErrorHandler = errorHandler()
-	return proxy, nil
-}
-
-func modifyRequest(req *http.Request) {
-	req.Header.Set("X-Proxy", "Simple-Reverse-Proxy")
-}
-
-func errorHandler() func(http.ResponseWriter, *http.Request, error) {
-	return func(w http.ResponseWriter, req *http.Request, err error) {
-		fmt.Printf("Got error while modifying response: %v \n", err)
-		return
-	}
-}
-
-func modifyResponse() func(*http.Response) error {
-	return func(resp *http.Response) error {
-		return errors.New("response body is invalid")
-	}
-}
-func ProxyRequestHandler(proxy *httputil.ReverseProxy) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		proxy.ServeHTTP(w, r)
-	}
-}
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
+// package mainfiles
+//
+// import (
+// 	"bytes"
+// 	"configs"
+// 	"io"
+// 	"io/ioutil"
+// 	"log"
+// 	"net"
+// 	"net/http"
+// 	"net/http/httputil"
+// 	"net/url"
+// 	"strings"
+// 	"time"
+// 	"utils"
+// )
+//
+// var transport = &http.Transport{
+// 	DialContext: (&net.Dialer{
+// 		Timeout:   30 * time.Second,
+// 		KeepAlive: 30 * time.Second,
+// 	}).DialContext,
+// 	MaxIdleConns:          configs.To.Clienmaxidle,
+// 	MaxConnsPerHost:       configs.To.Clienmaxperhost,
+// 	MaxIdleConnsPerHost:   configs.To.Clienmaxidleperhost,
+// 	IdleConnTimeout:       configs.To.Clienidletimeout * time.Second,
+// 	TLSHandshakeTimeout:   10 * time.Second,
+// 	ExpectContinueTimeout: 1 * time.Second,
+// }
+// var client = &http.Client{
+// 	Timeout:   time.Second * configs.To.Clientimeout,
+// 	Transport: transport,
+// }
+//
+// var key string
+// var qstring string
+//
+// func ProcessData(r *http.Request, w http.ResponseWriter) (int, []uint8, http.Header, error) {
+// 	data, err := ioutil.ReadAll(r.Body)
+// 	ip, _, err := net.SplitHostPort(r.RemoteAddr)
+// 	if err == nil {
+// 		r.Header.Add("X-FORWARDED-FOR", ip)
+// 	}
+//
+// 	defer func(Body io.ReadCloser) {
+// 		err := Body.Close()
+// 		if err != nil {
+//
+// 		}
+// 	}(r.Body)
+//
+// 	if err != nil {
+// 		log.Println(err)
+// 		return 500, []uint8("500 Internal server error\n"), nil, err
+// 	}
+//
+// 	switch utils.Dconf.Windcards[r.Host] {
+// 	case true:
+// 		qstring = strings.Split(r.URL.Path, "/")[1]
+// 		z := r.Host + "/" + qstring
+// 		if _, ok := utils.Dconf.Upstreams[z]; ok {
+// 			key = r.Host + "/" + qstring
+// 		} else {
+// 			key = r.Host
+// 		}
+// 	default:
+// 		qstring = strings.Split(r.URL.Path, "/")[1]
+// 		key = r.Host + "/" + qstring
+// 	}
+//
+// 	veq, e := utils.RetRandomMap(key)
+// 	v := veq + r.URL.String()
+// 	if e == nil {
+// 		req, histeric := http.NewRequest(r.Method, v, bytes.NewReader(data))
+// 		if histeric != nil {
+// 			log.Println("Error connecting To Upstream:", veq)
+// 			return 500, []uint8("500 Internal server error\n"), nil, histeric
+// 		}
+// 		if configs.To.ClientAuth {
+// 			req.SetBasicAuth(configs.To.ClientUser, configs.To.ClientPass)
+// 		}
+//
+// 		serveReverseProxy(ip, v, w, req)
+// 	}
+// 	return 200, nil, nil, nil
+// }
+//
+// func serveReverseProxy(ip string, u string, w http.ResponseWriter, r *http.Request) {
+// 	url, _ := url.Parse(u)
+// 	proxy := httputil.NewSingleHostReverseProxy(url)
+//
+// 	r.URL.Host = url.Host
+// 	r.URL.Scheme = url.Scheme
+// 	r.Header.Set("X-Forwarded-Host", r.Host)
+// 	r.Header.Set("X-Forwarded-For", ip)
+// 	r.Host = url.Host
+// 	proxy.ServeHTTP(w, r)
+// }
+//
+// - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - //
