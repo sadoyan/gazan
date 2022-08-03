@@ -87,7 +87,10 @@ func ProcessData(r *http.Request, w http.ResponseWriter) (int, []uint8, http.Hea
 		req.Header = r.Header
 		req.Host = r.Host
 		resp, err := client.Do(req)
-
+		if resp.Request.Response != nil {
+			resp.StatusCode = resp.Request.Response.StatusCode
+			resp.Header.Add("Location", resp.Request.URL.Path)
+		}
 		if err != nil {
 			log.Println("Dead upstream:", err)
 			time.Sleep(2 * time.Second)

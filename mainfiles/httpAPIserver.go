@@ -25,6 +25,7 @@ func dynHandler(w http.ResponseWriter, r *http.Request) {
 	case "POST", "GET":
 
 		status, body, headers, err := ProcessData(r, w)
+
 		if err != nil {
 
 			w.WriteHeader(status)
@@ -39,13 +40,15 @@ func dynHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 		}
+		w.WriteHeader(status)
+
 		_, ee := w.Write(body)
 		if ee != nil {
 			log.Println("HTTP basic error:", ee)
 			_, _ = w.Write([]uint8("500 Internal server error\n"))
 		}
 		if configs.To.Accesslog {
-			log.Println(r.Proto, r.RemoteAddr, r.Method, r.Host+r.RequestURI)
+			log.Println(status, r.Proto, r.RemoteAddr, r.Method, r.Host+r.RequestURI)
 		}
 	default:
 		w.WriteHeader(501)
@@ -132,7 +135,7 @@ func playmux2() {
 func serveTLS() {
 	muxTLS := http.NewServeMux()
 	muxTLS.HandleFunc("/", dynHandler)
-	muxTLS.HandleFunc("/login", jwtLogin)
+	muxTLS.HandleFunc("/loginski", jwtLogin)
 	sTLS := http.Server{
 		Addr:         configs.To.TLSAddress,
 		Handler:      muxTLS,
