@@ -69,5 +69,40 @@ func printStats() (s string) {
 	b = u.AccessCounter
 	t = tn
 	result, _ := json.MarshalIndent(u, "", "    ")
+
+	// -------------------------------------------------------- //
+	//dnsServer := "1.1.1.1:53"
+	//
+	//r := &net.Resolver{
+	//	PreferGo: true,
+	//	Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+	//		d := net.Dialer{
+	//			Timeout: time.Millisecond * time.Duration(10000),
+	//		}
+	//		return d.DialContext(ctx, network, dnsServer)
+	//	},
+	//}
+	//ip, _ := r.LookupHost(context.Background(), "app.oddeye.co")
+	//tx, _ := r.LookupTXT(context.Background(), "netangels.net")
+	//
+	//fmt.Println(ip)
+	//fmt.Println(tx)
+	//
+	//xx := len(dnsServer)
+	//
+	//cname, srvs, err := net.LookupSRV("xmpp-server", "tcp", "google.com")
+	//
+	//if xx != 0 {
+	//	cname, srvs, err = r.LookupSRV(context.Background(), "xmpp-server", "tcp", "google.com")
+	//}
+	//
+	//if err != nil {
+	//	log.Panic(err)
+	//}
+	//fmt.Println(cname)
+	//for _, srv := range srvs {
+	//	fmt.Println(srv.Target, srv.Port, srv.Priority, srv.Weight)
+	//}
+	// -------------------------------------------------------- //
 	return string(result)
 }

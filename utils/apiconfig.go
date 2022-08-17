@@ -12,12 +12,33 @@ import (
 	"time"
 )
 
-func ApiConfig(r *http.Request) {
+func wcconfig(k, s string) {
+	if strings.HasSuffix(k, "/*") {
+		nk := strings.Replace(k, "/*", "", -1)
+		Dconf.Lock()
+		Dconf.Windcards[nk] = true
+		Dconf.Constants[nk] = Dconf.Constants[k]
+		Dconf.Upstreams[nk] = Dconf.Upstreams[k]
+		delete(Dconf.Constants, k)
+		delete(Dconf.Upstreams, k)
+		Dconf.Unlock()
+	} else if !strings.Contains(k, s) {
+		Dconf.Lock()
+		Dconf.Windcards[k] = true
+		Dconf.Unlock()
+	} else {
+
+	}
+}
+
+func ApiConfig(r *http.Request) []byte {
 	urlparam := r.URL.Query().Get("cfg")
 	decoder := json.NewDecoder(r.Body)
-
 	switch urlparam {
-	case "append":
+	case "get", "dump":
+		result, _ := json.MarshalIndent(Dconf, "", "    ")
+		return result
+	case "append", "add":
 		tempUps := make(map[string][]string)
 		er := decoder.Decode(&tempUps)
 		if er != nil {
@@ -25,6 +46,7 @@ func ApiConfig(r *http.Request) {
 		}
 		var changes bool
 		for k, v := range tempUps {
+
 			for vv := range v {
 				switch Contains(Dconf.Constants[k], v[vv]) {
 				case false:
@@ -36,6 +58,7 @@ func ApiConfig(r *http.Request) {
 					changes = true
 				}
 			}
+			wcconfig(k, "/")
 		}
 		if !changes {
 			log.Println("No Changes sice last update")
@@ -53,14 +76,17 @@ func ApiConfig(r *http.Request) {
 		Dconf.Unlock()
 		for k, x := range Dconf.Constants {
 			log.Println("Main: ", k)
+
 			for v := range x {
 				log.Println("  Upstream: ", x[v])
 			}
+			wcconfig(k, "/")
 		}
 	default:
 		log.Println("Unknown parameter ")
 	}
-
+	result, _ := json.MarshalIndent(Dconf, "", "    ")
+	return result
 }
 
 func LoadUpstreamsFronFIle(up string) {
@@ -71,14 +97,13 @@ func LoadUpstreamsFronFIle(up string) {
 	} else {
 		er := json.Unmarshal(data, &Dconf.Upstreams)
 		for k, v := range Dconf.Upstreams {
-			if !strings.Contains(k, "/") {
-				Dconf.Windcards[k] = true
-			}
+
 			Dconf.Constants[k] = v
 			for vv := range v {
 				fmt.Println("Registering URL", k, "To Upstream:", v[vv])
 			}
 			fmt.Println(" ")
+			wcconfig(k, "/")
 		}
 
 		if er == nil {
@@ -136,3 +161,4 @@ func Valod(healtchecks int) {
 
 // curl -XPOST -u 'test:Te$ting' --data-binary @/tmp/balod.json 127.0.0.1:4141/config?cfg=new
 // curl -XPOST -u 'test:Te$ting' --data-binary @/tmp/valod.json 127.0.0.1:4141/config?cfg=append
+// curl -u 'test:Te$ting' 127.0.0.1:4141/config?cfg=get

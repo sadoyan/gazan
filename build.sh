@@ -9,8 +9,7 @@
 #export GOPATH=/opt/GOLang/goext
 #go build -o /tmp/Gazan main.go
 #
-#reflex -d none -r '.'  -s -- sh -c  'go run ./ -config config.ini -up=cfgjson/upstreams.json'
-
-reflex -d none -r '.'  -s -- sh -c  'rsync -vzal ../gazan razor:/usr/local/src/ --exclude config.ini --exclude build.sh  && sleep 10d'
+reflex -d none -r '.'  -s -- sh -c  'go run ./ -config config.ini -up=cfgjson/upstreams.json'
+#reflex -d none -r '.'  -s -- sh -c  'rsync -vzal ../gazan razor:/usr/local/src/ --exclude config.ini --exclude build.sh  && sleep 10d'
 
 # curl -XPOST -u 'test:Te$ting' --data-binary @config/upstreams.json 127.0.0.1:4141/config?cfg=new

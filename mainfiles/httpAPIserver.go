@@ -34,14 +34,14 @@ func dynHandler(w http.ResponseWriter, r *http.Request) {
 				log.Println(be)
 			}
 		}
+
 		for k, v := range headers {
 			for hlen := range v {
 				w.Header().Add(k, v[hlen])
 			}
 
 		}
-		w.WriteHeader(status)
-
+		//w.WriteHeader(status)
 		_, ee := w.Write(body)
 		if ee != nil {
 			log.Println("HTTP basic error:", ee)
@@ -67,8 +67,13 @@ func dynconfig(w http.ResponseWriter, r *http.Request) {
 	if configs.To.ServerAuth {
 		utils.CheckAuth(w, r)
 	}
-	utils.ApiConfig(r)
+	_, ee := w.Write(utils.ApiConfig(r))
+	if ee != nil {
+		log.Println("Error in API config", ee)
+	}
+	_, _ = w.Write([]byte("\n"))
 }
+
 func jwtLogin(w http.ResponseWriter, r *http.Request) {
 	reqBody, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -94,7 +99,7 @@ func jwtLogin(w http.ResponseWriter, r *http.Request) {
 func playmux0() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", dynHandler)
-	mux.HandleFunc("/login", jwtLogin)
+	mux.HandleFunc("/loginski", jwtLogin)
 	s1 := http.Server{
 		Addr:         configs.To.HttpAddress,
 		Handler:      mux,
