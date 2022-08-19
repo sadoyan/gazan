@@ -14,5 +14,6 @@ func main() {
 	//utils.CheckJWTtoken()
 
 	go utils.Valod(configs.To.Healtchecks)
+	go utils.GetHostsbyDNS()
 	mainfiles.RunServer()
 }

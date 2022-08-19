@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -158,6 +159,68 @@ func Valod(healtchecks int) {
 	}
 
 }
+
+// -------------------------------------------------------- //
+var dnsServer = "192.168.10.104:8600"
+
+var r = &net.Resolver{
+	PreferGo: true,
+	Dial: func(ctx context.Context, network, address string) (net.Conn, error) {
+		d := net.Dialer{
+			Timeout: time.Millisecond * time.Duration(1000),
+		}
+		return d.DialContext(ctx, network, dnsServer)
+	},
+}
+
+func GetHostsbyDNS() {
+	//ip, _ := r.LookupHost(context.Background(), "app.oddeye.co")
+	//tx, _ := r.LookupTXT(context.Background(), "netangels.net")
+
+	//lookupstring := "xmpp-server.tcp.google.com" _apache-web-health._tcp.service.consul
+	//lookups := ["nginx-consul-NginX-health.tcp.service.consul", "ffff"]
+	b := []string{"nginx-consul-NginX-health.tcp.service.consul", "devecho-devEcho-health.tcp.service.consul"}
+	//lookupstring := "nginx-consul-NginX-health.tcp.service.consul"
+	//lookupslice := strings.Split(lookupstring, ".")
+
+	for {
+		for l := range b {
+			fmt.Println(b[l])
+
+			lookupstring := b[l]
+			lookupslice := strings.Split(lookupstring, ".")
+
+			n := lookupslice[0]
+			p := lookupslice[1]
+			d := strings.Join(lookupslice[2:], ".")
+
+			xx := len(dnsServer)
+
+			cname, srvs, err := net.LookupSRV(n, p, d)
+			//cname, srvs, err := r.LookupSRV(context.Background(), n, p, d)
+			if xx != 0 {
+				cname, srvs, err = r.LookupSRV(context.Background(), n, p, d)
+			}
+
+			if err == nil {
+				fmt.Println(cname)
+				for _, srv := range srvs {
+					ip, _ := r.LookupHost(context.Background(), srv.Target)
+					fmt.Println(ip, srv.Target, srv.Port, srv.Priority, srv.Weight)
+				}
+
+			} else {
+				log.Println(err)
+			}
+
+		}
+
+		time.Sleep(5 * time.Second)
+	}
+
+}
+
+// -------------------------------------------------------- //
 
 // curl -XPOST -u 'test:Te$ting' --data-binary @/tmp/balod.json 127.0.0.1:4141/config?cfg=new
 // curl -XPOST -u 'test:Te$ting' --data-binary @/tmp/valod.json 127.0.0.1:4141/config?cfg=append
