@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"configs"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -9,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -161,7 +163,6 @@ func Valod(healtchecks int) {
 }
 
 // -------------------------------------------------------- //
-var dnsServer = "192.168.10.104:8600"
 
 var r = &net.Resolver{
 	PreferGo: true,
@@ -169,55 +170,47 @@ var r = &net.Resolver{
 		d := net.Dialer{
 			Timeout: time.Millisecond * time.Duration(1000),
 		}
-		return d.DialContext(ctx, network, dnsServer)
+		return d.DialContext(ctx, network, RetRandom(configs.To.DnsServer))
 	},
 }
 
 func GetHostsbyDNS() {
-	//ip, _ := r.LookupHost(context.Background(), "app.oddeye.co")
-	//tx, _ := r.LookupTXT(context.Background(), "netangels.net")
-
-	//lookupstring := "xmpp-server.tcp.google.com" _apache-web-health._tcp.service.consul
-	//lookups := ["nginx-consul-NginX-health.tcp.service.consul", "ffff"]
-	b := []string{"nginx-consul-NginX-health.tcp.service.consul", "devecho-devEcho-health.tcp.service.consul"}
-	//lookupstring := "nginx-consul-NginX-health.tcp.service.consul"
-	//lookupslice := strings.Split(lookupstring, ".")
-
+	dnsmap := make(map[string]string)
+	dnsmap["p1.netangels.net:8080"] = "nginx-consul-NginX-health.tcp.service.consul"
+	dnsmap["p2.netangels.net:8080"] = "devecho-devEcho-health.tcp.service.consul"
 	for {
-		for l := range b {
-			fmt.Println(b[l])
-
-			lookupstring := b[l]
+		tempUps := make(map[string][]string)
+		for name, _ := range dnsmap {
+			lookupstring := dnsmap[name]
 			lookupslice := strings.Split(lookupstring, ".")
-
 			n := lookupslice[0]
 			p := lookupslice[1]
 			d := strings.Join(lookupslice[2:], ".")
+			_, srvs, err := net.LookupSRV(n, p, d)
+			if configs.To.Dns {
+				//fmt.Println(configs.To.DnsServer)
+				//fmt.Println("- - - - - -")
+				//fmt.Println(RetRandom(configs.To.DnsServer))
+				_, srvs, err = r.LookupSRV(context.Background(), n, p, d)
 
-			xx := len(dnsServer)
-
-			cname, srvs, err := net.LookupSRV(n, p, d)
-			//cname, srvs, err := r.LookupSRV(context.Background(), n, p, d)
-			if xx != 0 {
-				cname, srvs, err = r.LookupSRV(context.Background(), n, p, d)
 			}
-
 			if err == nil {
-				fmt.Println(cname)
 				for _, srv := range srvs {
 					ip, _ := r.LookupHost(context.Background(), srv.Target)
-					fmt.Println(ip, srv.Target, srv.Port, srv.Priority, srv.Weight)
+					//fmt.Println(name, ip, srv.Target, srv.Port, srv.Priority, srv.Weight)
+					target := "http://" + ip[0] + ":" + strconv.Itoa(int(srv.Port))
+					tempUps[name] = append(tempUps[name], target)
 				}
-
 			} else {
 				log.Println(err)
 			}
-
 		}
-
+		Dconf.Lock()
+		Dconf.Constants = tempUps
+		Dconf.Upstreams = tempUps
+		Dconf.Unlock()
 		time.Sleep(5 * time.Second)
 	}
-
 }
 
 // -------------------------------------------------------- //
