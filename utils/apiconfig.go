@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"reflect"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -140,16 +141,14 @@ func Valod(healtchecks int) {
 			for r := range v {
 				_, ee := client.Get(v[r])
 				if ee != nil {
-					fmt.Println(ee)
-
+					log.Println(ee)
 				} else {
 					s[k] = append(s[k], v[r])
 				}
 
 			}
 		}
-		eq := reflect.DeepEqual(Dconf.Upstreams, s)
-		switch eq {
+		switch reflect.DeepEqual(Dconf.Upstreams, s) {
 		case false:
 			Dconf.Lock()
 			Dconf.Upstreams = s
@@ -174,42 +173,56 @@ var r = &net.Resolver{
 	},
 }
 
-func GetHostsbyDNS() {
-	dnsmap := make(map[string]string)
-	dnsmap["p1.netangels.net:8080"] = "nginx-consul-NginX-health.tcp.service.consul"
-	dnsmap["p2.netangels.net:8080"] = "devecho-devEcho-health.tcp.service.consul"
-	for {
-		tempUps := make(map[string][]string)
-		for name, _ := range dnsmap {
-			lookupstring := dnsmap[name]
-			lookupslice := strings.Split(lookupstring, ".")
-			n := lookupslice[0]
-			p := lookupslice[1]
-			d := strings.Join(lookupslice[2:], ".")
-			_, srvs, err := net.LookupSRV(n, p, d)
-			if configs.To.Dns {
-				//fmt.Println(configs.To.DnsServer)
-				//fmt.Println("- - - - - -")
-				//fmt.Println(RetRandom(configs.To.DnsServer))
-				_, srvs, err = r.LookupSRV(context.Background(), n, p, d)
+func choosedns(n string, p string, d string) ([]*net.SRV, error) {
+	switch configs.To.Dns {
+	case true:
+		_, srvs, err := r.LookupSRV(context.Background(), n, p, d)
+		return srvs, err
+	default:
+		_, srvs, err := net.LookupSRV(n, p, d)
+		return srvs, err
+	}
+}
 
-			}
-			if err == nil {
-				for _, srv := range srvs {
-					ip, _ := r.LookupHost(context.Background(), srv.Target)
-					//fmt.Println(name, ip, srv.Target, srv.Port, srv.Priority, srv.Weight)
-					target := "http://" + ip[0] + ":" + strconv.Itoa(int(srv.Port))
-					tempUps[name] = append(tempUps[name], target)
+func GetHostsbyDNS() {
+	for !configs.To.ImRunning {
+		time.Sleep(500 * time.Millisecond)
+	}
+	switch configs.To.Dns {
+	case true:
+		for {
+			tempUps := make(map[string][]string)
+			for name, _ := range configs.To.DnsRecords {
+				lookupstring := configs.To.DnsRecords[name]
+				lookupslice := strings.Split(lookupstring, ".")
+				n := lookupslice[0]
+				p := lookupslice[1]
+				d := strings.Join(lookupslice[2:], ".")
+				srvs, err := choosedns(n, p, d)
+				if err == nil {
+					for _, srv := range srvs {
+						ip, _ := r.LookupHost(context.Background(), srv.Target)
+						target := "http://" + ip[0] + ":" + strconv.Itoa(int(srv.Port))
+						tempUps[name] = append(tempUps[name], target)
+					}
+				} else {
+					log.Println(err)
 				}
-			} else {
-				log.Println(err)
 			}
+			for name, _ := range configs.To.DnsRecords {
+				wcconfig(name, "/")
+			}
+			for _, mo := range tempUps {
+				sort.Strings(mo)
+			}
+			if !reflect.DeepEqual(Dconf.Constants, tempUps) || !reflect.DeepEqual(Dconf.Upstreams, tempUps) {
+				Dconf.Lock()
+				Dconf.Constants = tempUps
+				Dconf.Upstreams = tempUps
+				Dconf.Unlock()
+			}
+			time.Sleep(5 * time.Second)
 		}
-		Dconf.Lock()
-		Dconf.Constants = tempUps
-		Dconf.Upstreams = tempUps
-		Dconf.Unlock()
-		time.Sleep(5 * time.Second)
 	}
 }
 

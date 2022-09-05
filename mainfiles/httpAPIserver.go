@@ -191,6 +191,7 @@ func RunServer() {
 	}
 	time.Sleep(time.Second)
 	utils.LoadUpstreamsFronFIle(configs.To.UpstreamsFile)
+	configs.To.ImRunning = true
 	forever := make(chan bool)
 	<-forever
 
