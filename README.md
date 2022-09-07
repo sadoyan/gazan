@@ -10,12 +10,6 @@ To install Gazan you need just to download the latest binary and config.yml file
 
 Some sample config files for feeding API server are included in `cfgjson` folder of sourcetree.
 
-```shell
-curl -XPOST -u 'test:Te$ting' --data-binary @/tmp/balod.json 127.0.0.1:4141/config?cfg=new
-curl -XPOST -u 'test:Te$ting' --data-binary @/tmp/valod.json 127.0.0.1:4141/config?cfg=append
-curl -u 'test:Te$ting' 127.0.0.1:4141/config?cfg=get
-```
-
 Following is sample config file for Gazan from GitHub :  
 
 ```yaml
@@ -23,7 +17,9 @@ main:
   listen : 0.0.0.0:8080
   confurl : 127.0.0.1:4141
   healtchecks : 2
+  # authtype : apikey , basic, jwt, none
   authtype: none
+  configauth : yes
   accesslog: off
 dnsconfig:
   enabled : yes
@@ -62,6 +58,14 @@ Configure basic setting, like bind address etc ...
 
 **confurl** : Address and port for accepting API calls for configuring upstreams.
 
+**configauth** : Enable or disable authentication for configure requests (yes/no). 
+If enabled you should set OS environment variable **CONFIGKEY** and config refquests should 
+include paramenter `key`:
+```shell
+curl -XPOST --data-binary @cfgjson/upstreams.json "http://127.0.0.1:4141/config?cfg=new&key=$CONFIGKEY"
+curl -XPOST --data-binary @cfgjson/upstreams.json "http://127.0.0.1:4141/config?cfg=append&key=$CONFIGKEY"
+curl "http://127.0.0.1:4141/config?cfg=get&key=$CONFIGKEY"
+```
 **healtchecks** : Upstreams health check interval in second.
 
 **accesslog** : off

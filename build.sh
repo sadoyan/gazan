@@ -4,6 +4,7 @@
 #export BASICUSER='test'
 #export BASICPASS='Te$ting'
 #export JWTSECRET='Super$ecter123765@'
+export CONFIGKEY='47690a568c204f1b85fe997ce9fc3ee53a571be5508a4d8ca1da238533ffe3f2'
 #
 #
 #export GOPATH=/opt/GOLang/goext

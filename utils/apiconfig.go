@@ -35,9 +35,21 @@ func wcconfig(k, s string) {
 	}
 }
 
-func ApiConfig(r *http.Request) []byte {
+func ApiConfig(r *http.Request, w http.ResponseWriter) []byte {
 	urlparam := r.URL.Query().Get("cfg")
 	decoder := json.NewDecoder(r.Body)
+
+	switch configs.To.Configauth {
+	case true:
+		const unauth = http.StatusUnauthorized
+		apikey := r.URL.Query().Get("key")
+		if apikey != configs.To.Configkey {
+			log.Print("Invalid CONFIG-KEY: ", apikey)
+			http.Error(w, http.StatusText(unauth), unauth)
+			return []byte("Invalid CONFIG-KEY")
+		}
+	}
+
 	switch urlparam {
 	case "get", "dump":
 		result, _ := json.MarshalIndent(Dconf, "", "    ")

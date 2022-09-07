@@ -32,6 +32,8 @@ type confVars struct {
 	TLSPrivKey          string
 	Healtchecks         int
 	ServerAuth          bool
+	Configauth          bool
+	Configkey           string
 	BasicAuth           bool
 	ApiKeyAuth          bool
 	JWTAuth             bool
@@ -68,6 +70,8 @@ var To = &confVars{
 	TLSPrivKey:          "",
 	Healtchecks:         20,
 	ServerAuth:          false,
+	Configauth:          false,
+	Configkey:           "",
 	BasicAuth:           false,
 	JWTAuth:             false,
 	ApiKeyAuth:          false,
@@ -137,6 +141,16 @@ func SetVarsik() {
 	To.Confurl = data["main"]["confurl"].(string)
 	To.Accesslog = strtoBool(data["main"]["accesslog"].(string))
 
+	To.Configauth = strtoBool(data["main"]["configauth"].(string))
+	switch To.Configauth {
+	case true:
+		if os.Getenv("CONFIGKEY") == "" {
+			log.Print("\n\n\n Authentication for configuration is enable but Key is not set \n Please set OS enviroment variable CONFIGKEY to your api key\n\n")
+			os.Exit(2)
+		} else {
+			To.Configkey = os.Getenv("CONFIGKEY")
+		}
+	}
 	authtype := data["main"]["authtype"].(string)
 	switch authtype {
 	case "none":

@@ -64,10 +64,10 @@ func mxhandl(w http.ResponseWriter, _ *http.Request) {
 	_, _ = fmt.Fprintln(w, mz)
 }
 func dynconfig(w http.ResponseWriter, r *http.Request) {
-	if configs.To.ServerAuth {
-		utils.CheckAuth(w, r)
-	}
-	_, ee := w.Write(utils.ApiConfig(r))
+	//if configs.To.ServerAuth {
+	//	utils.CheckAuth(w, r)
+	//}
+	_, ee := w.Write(utils.ApiConfig(r, w))
 	if ee != nil {
 		log.Println("Error in API config", ee)
 	}

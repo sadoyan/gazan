@@ -4,6 +4,7 @@ main:
   healtchecks : 2
   # authtype : apikey , basic, jwt, none
   authtype: none
+  configauth : yes
   accesslog: off
 dnsconfig:
   enabled : yes
