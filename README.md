@@ -15,7 +15,6 @@ main:
   listen : 0.0.0.0:8080
   confurl : 127.0.0.1:4141
   healtchecks : 2
-  # authtype : apikey , basic, jwt, none
   authtype: none
   accesslog: off
 dnsconfig:
