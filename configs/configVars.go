@@ -135,10 +135,9 @@ func SetVarsik() {
 	To.Monenabled = strtoBool(data["monitoring"]["enabled"].(string))
 	To.Monurl = data["monitoring"]["url"].(string)
 	To.Confurl = data["main"]["confurl"].(string)
-	To.Accesslog = strtoBool(data["server"]["accesslog"].(string))
-	To.Dns = strtoBool(data["main"]["dnsapi"].(string))
+	To.Accesslog = strtoBool(data["main"]["accesslog"].(string))
 
-	authtype := data["server"]["authtype"].(string)
+	authtype := data["main"]["authtype"].(string)
 	switch authtype {
 	case "none":
 		To.ServerAuth = false
@@ -178,12 +177,12 @@ func SetVarsik() {
 		os.Exit(2)
 	}
 
-	for _, dnssrv := range data["main"]["dnsserver"].([]interface{}) {
+	//To.DnsServer = strings.Split(strings.Replace(data["main"]["dnsserver"].(string), " ", "", -1), ",")
+	To.Dns = strtoBool(data["dnsconfig"]["enabled"].(string))
+	for _, dnssrv := range data["dnsconfig"]["dnsservers"].([]interface{}) {
 		To.DnsServer = append(To.DnsServer, dnssrv.(string))
 	}
-	//To.DnsServer = strings.Split(strings.Replace(data["main"]["dnsserver"].(string), " ", "", -1), ",")
-
-	for _, vvv := range data["main"]["dnsnames"].([]interface{}) {
+	for _, vvv := range data["dnsconfig"]["srvrecords"].([]interface{}) {
 		To.DnsRecords[vvv.(map[string]interface{})["name"].(string)] = vvv.(map[string]interface{})["address"].(string)
 	}
 }

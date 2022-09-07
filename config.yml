@@ -2,12 +2,16 @@ main:
   listen : 0.0.0.0:8080
   confurl : 127.0.0.1:4141
   healtchecks : 2
-  dnsapi : yes
-  dnsserver:
+  # authtype : apikey , basic, jwt, none
+  authtype: none
+  accesslog: off
+dnsconfig:
+  enabled : yes
+  dnsservers:
      - 192.168.10.104:8600
      - 192.168.10.105:8600
      - 192.168.10.106:8600
-  dnsnames:
+  srvrecords:
      - name    : p1.netangels.net:8080
        address : nginx-consul-NginX-health.tcp.service.consul
      - name    : p2.netangels.net:8080
@@ -17,10 +21,6 @@ tls:
   certificate : /tmp/fullchain.cer
   privatekey : /tmp/netangels.net.key
   listen : 0.0.0.0:8443
-server:
-  # authtype : apikey , basic, jwt, none
-  authtype : none
-  accesslog  : off
 client:
   clientauth : no
   clientuser : test
