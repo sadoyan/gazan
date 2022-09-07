@@ -8,7 +8,15 @@ Gazan can load balance applications based on first level URL path or do wildcard
 
 To install Gazan you need just to download the latest binary and config.yml file from our GitHub and run it. 
 
-Following is sample config file for Gazan from GitHub : 
+Some sample config files for feeding API server are included in `cfgjson` folder of sourcetree.
+
+```shell
+curl -XPOST -u 'test:Te$ting' --data-binary @/tmp/balod.json 127.0.0.1:4141/config?cfg=new
+curl -XPOST -u 'test:Te$ting' --data-binary @/tmp/valod.json 127.0.0.1:4141/config?cfg=append
+curl -u 'test:Te$ting' 127.0.0.1:4141/config?cfg=get
+```
+
+Following is sample config file for Gazan from GitHub :  
 
 ```yaml
 main:
