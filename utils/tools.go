@@ -86,39 +86,6 @@ func CheckAuth(w http.ResponseWriter, r *http.Request) bool {
 	default:
 		return false
 	}
-
-	//if configs.To.ApiKeyAuth {
-	//	if r.Header.Get("X-API-KEY") == configs.To.ApiKey {
-	//		return true
-	//	} else {
-	//		log.Print("Invalid authorization-AAAAAAA:", basicAuth)
-	//		http.Error(w, http.StatusText(unauth), unauth)
-	//		return false
-	//	}
-	//}
-	//if configs.To.BasicAuth {
-	//	if !strings.HasPrefix(basicAuth, "Basic ") {
-	//		log.Print("Invalid authorization:", basicAuth)
-	//		http.Error(w, http.StatusText(unauth), unauth)
-	//		return false
-	//	}
-	//
-	//	up, err := base64.StdEncoding.DecodeString(basicAuth[6:])
-	//	if err != nil {
-	//		log.Print("authorization decode error:", err)
-	//		http.Error(w, http.StatusText(unauth), unauth)
-	//		return false
-	//	}
-	//	if string(up) != authorized {
-	//		http.Error(w, http.StatusText(unauth), unauth)
-	//		log.Print("authorization decode error:", err)
-	//
-	//		return false
-	//	}
-	//	return true
-	//}
-	//return false
-
 }
 
 func Contains(a []string, x string) bool {
