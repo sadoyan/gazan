@@ -13,7 +13,8 @@ func main() {
 	//go utils.GetHostsByHTTP()
 	//utils.CheckJWTtoken()
 
-	go utils.Valod(configs.To.Healtchecks)
+	go utils.Healtcheck(configs.To.Healtchecks)
 	go utils.GetHostsbyDNS()
+	go utils.PopulateUSers()
 	mainfiles.RunServer()
 }

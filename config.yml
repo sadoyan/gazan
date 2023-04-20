@@ -3,11 +3,11 @@ main:
   confurl : 127.0.0.1:4141
   healtchecks : 2
   # authtype : apikey , basic, jwt, none
-  authtype: none
+  authtype: jwt
   configauth : yes
   accesslog: off
 dnsconfig:
-  enabled : yes
+  enabled : no
   dnsservers:
      - 192.168.10.104:8600
      - 192.168.10.105:8600

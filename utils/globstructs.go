@@ -17,5 +17,3 @@ var Dconf = &Ddconf{
 	Windcards: make(map[string]bool),
 	RWMutex:   sync.RWMutex{},
 }
-
-//var Serob = make(map[string][]string)

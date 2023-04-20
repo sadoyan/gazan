@@ -1,9 +1,9 @@
 #!/bin/bash
 
-#export GAZANKEY='a66cd04bb85a2daed5080fb41c3da6642f37f4390d76e37c2a57f4edd4c9324e'
-#export BASICUSER='test'
-#export BASICPASS='Te$ting'
-#export JWTSECRET='Super$ecter123765@'
+export GAZANKEY='a66cd04bb85a2daed5080fb41c3da6642f37f4390d76e37c2a57f4edd4c9324e'
+export BASICUSER='test'
+export BASICPASS='Te$ting'
+export JWTSECRET='Super$ecter123765@'
 export CONFIGKEY='47690a568c204f1b85fe997ce9fc3ee53a571be5508a4d8ca1da238533ffe3f2'
 #
 #

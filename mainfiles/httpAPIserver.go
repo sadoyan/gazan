@@ -5,9 +5,10 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
+	"os"
 	"runtime"
 	"time"
 	"utils"
@@ -41,7 +42,6 @@ func dynHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 		}
-		//w.WriteHeader(status)
 		_, ee := w.Write(body)
 		if ee != nil {
 			log.Println("HTTP basic error:", ee)
@@ -64,9 +64,6 @@ func mxhandl(w http.ResponseWriter, _ *http.Request) {
 	_, _ = fmt.Fprintln(w, mz)
 }
 func dynconfig(w http.ResponseWriter, r *http.Request) {
-	//if configs.To.ServerAuth {
-	//	utils.CheckAuth(w, r)
-	//}
 	_, ee := w.Write(utils.ApiConfig(r, w))
 	if ee != nil {
 		log.Println("Error in API config", ee)
@@ -75,7 +72,7 @@ func dynconfig(w http.ResponseWriter, r *http.Request) {
 }
 
 func jwtLogin(w http.ResponseWriter, r *http.Request) {
-	reqBody, err := ioutil.ReadAll(r.Body)
+	reqBody, err := io.ReadAll(r.Body)
 	if err != nil {
 		fmt.Println("JWT handler read body", err)
 	}
@@ -148,7 +145,7 @@ func serveTLS() {
 		WriteTimeout: 100 * time.Second,
 	}
 
-	r, e1 := ioutil.ReadFile(configs.To.TLSCertFIle)
+	r, e1 := os.ReadFile(configs.To.TLSCertFIle)
 	block, _ := pem.Decode(r)
 
 	if e1 != nil {
@@ -160,7 +157,7 @@ func serveTLS() {
 		log.Fatal("Invalid Certificate file:", err)
 	}
 
-	v, e3 := ioutil.ReadFile(configs.To.TLSPrivKey)
+	v, e3 := os.ReadFile(configs.To.TLSPrivKey)
 	if e3 != nil {
 		log.Fatal("Error loading private key file:", e3)
 	}

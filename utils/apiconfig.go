@@ -4,11 +4,10 @@ import (
 	"configs"
 	"context"
 	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"reflect"
 	"sort"
 	"strconv"
@@ -16,7 +15,7 @@ import (
 	"time"
 )
 
-func wcconfig(k, s string) {
+func (a *Ddconf) wcconfig(k, s string) {
 	if strings.HasSuffix(k, "/*") {
 		nk := strings.Replace(k, "/*", "", -1)
 		Dconf.Lock()
@@ -70,11 +69,11 @@ func ApiConfig(r *http.Request, w http.ResponseWriter) []byte {
 					Dconf.Constants[k] = append(tempUps[k], v[vv])
 					Dconf.Upstreams[k] = append(tempUps[k], v[vv])
 					Dconf.Unlock()
-					fmt.Println("Registering URL", k, "To Upstream:", v[vv])
+					log.Println("Registering URL", k, "To Upstream:", v[vv])
 					changes = true
 				}
 			}
-			wcconfig(k, "/")
+			Dconf.wcconfig(k, "/")
 		}
 		if !changes {
 			log.Println("No Changes sice last update")
@@ -83,9 +82,9 @@ func ApiConfig(r *http.Request, w http.ResponseWriter) []byte {
 		tempUps := make(map[string][]string)
 		er := decoder.Decode(&tempUps)
 		if er != nil {
-			fmt.Println("Error decoding json:", er)
+			log.Println("Error decoding json:", er)
 		}
-		fmt.Println("Creating new upstream config")
+		log.Println("Creating new upstream config")
 		Dconf.Lock()
 		Dconf.Constants = tempUps
 		Dconf.Upstreams = tempUps
@@ -96,7 +95,7 @@ func ApiConfig(r *http.Request, w http.ResponseWriter) []byte {
 			for v := range x {
 				log.Println("  Upstream: ", x[v])
 			}
-			wcconfig(k, "/")
+			Dconf.wcconfig(k, "/")
 		}
 	default:
 		log.Println("Unknown parameter ")
@@ -106,7 +105,7 @@ func ApiConfig(r *http.Request, w http.ResponseWriter) []byte {
 }
 
 func LoadUpstreamsFronFIle(up string) {
-	data, err := ioutil.ReadFile(up)
+	data, err := os.ReadFile(up)
 	if err != nil {
 		log.Println("Cant load default upstreams file:", err)
 		log.Println("Startingwithout upstreams")
@@ -116,10 +115,10 @@ func LoadUpstreamsFronFIle(up string) {
 
 			Dconf.Constants[k] = v
 			for vv := range v {
-				fmt.Println("Registering URL", k, "To Upstream:", v[vv])
+				log.Println("Registering URL", k, "To Upstream:", v[vv])
 			}
-			fmt.Println(" ")
-			wcconfig(k, "/")
+			log.Println(" ")
+			Dconf.wcconfig(k, "/")
 		}
 
 		if er == nil {
@@ -130,7 +129,7 @@ func LoadUpstreamsFronFIle(up string) {
 	}
 }
 
-func Valod(healtchecks int) {
+func Healtcheck(healtchecks int) {
 	transport := &http.Transport{
 		DialContext: (&net.Dialer{
 			Timeout:   2 * time.Second,
@@ -150,12 +149,12 @@ func Valod(healtchecks int) {
 	for {
 		s := make(map[string][]string)
 		for k, v := range Dconf.Constants {
-			for r := range v {
-				_, ee := client.Get(v[r])
+			for o := range v {
+				_, ee := client.Get(v[o])
 				if ee != nil {
 					log.Println(ee)
 				} else {
-					s[k] = append(s[k], v[r])
+					s[k] = append(s[k], v[o])
 				}
 
 			}
@@ -222,7 +221,7 @@ func GetHostsbyDNS() {
 				}
 			}
 			for name, _ := range configs.To.DnsRecords {
-				wcconfig(name, "/")
+				Dconf.wcconfig(name, "/")
 			}
 			for _, mo := range tempUps {
 				sort.Strings(mo)

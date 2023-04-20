@@ -1,6 +1,6 @@
 module gazan
 
-go 1.17
+go 1.20
 
 require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
