@@ -3,7 +3,7 @@ main:
   confurl : 127.0.0.1:4141
   healtchecks : 2
   # authtype : apikey , basic, jwt, none
-  authtype: jwt
+  authtype: none
   configauth : yes
   accesslog: off
 dnsconfig:

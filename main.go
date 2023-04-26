@@ -7,14 +7,8 @@ import (
 )
 
 func main() {
-	//ankap.Play()
-	//go utils.GetSeed()
-	//utils.GetHostsByDNS()
-	//go utils.GetHostsByHTTP()
-	//utils.CheckJWTtoken()
-
 	go utils.Healtcheck(configs.To.Healtchecks)
 	go utils.GetHostsbyDNS()
-	go utils.PopulateUSers()
+	utils.PopulateUSers()
 	mainfiles.RunServer()
 }

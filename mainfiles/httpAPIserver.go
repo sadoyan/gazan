@@ -24,18 +24,15 @@ func dynHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	switch r.Method {
 	case "POST", "GET":
-
 		status, body, headers, err := ProcessData(r, w)
-
 		if err != nil {
-
 			w.WriteHeader(status)
-			_, be := w.Write([]uint8("500 Internal server error\n"))
+			_, be := w.Write(body)
 			if be != nil {
 				log.Println(be)
 			}
+			return
 		}
-
 		for k, v := range headers {
 			for hlen := range v {
 				w.Header().Add(k, v[hlen])

@@ -18,6 +18,12 @@
     "http://192.168.10.1:8000",
     "http://dwarf.netangels.loc:8000"
   ],
+  "pastor:8080/vas/pastor": [
+    "http://192.168.10.10:8000"
+  ],
+  "pastor:8080/vas/dwarf": [
+    "http://192.168.10.1:8000"
+  ],
   "192.168.10.10:8080/jivan": [
     "http://gnome:8000",
     "http://dwarf:8000"
