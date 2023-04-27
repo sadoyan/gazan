@@ -108,9 +108,9 @@ func ProcessData(r *http.Request, w http.ResponseWriter) (int, []uint8, http.Hea
 	if resp.ContentLength > 1048576 {
 		scanner := bufio.NewScanner(resp.Body)
 		scanner.Split(bufio.ScanBytes)
-		for k, v := range resp.Header {
-			for x := range v {
-				w.Header().Add(k, v[x])
+		for ke, va := range resp.Header {
+			for x := range va {
+				w.Header().Add(ke, va[x])
 			}
 		}
 		for scanner.Scan() {

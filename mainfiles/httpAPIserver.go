@@ -5,7 +5,6 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -68,32 +67,32 @@ func dynconfig(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte("\n"))
 }
 
-func jwtLogin(w http.ResponseWriter, r *http.Request) {
-	reqBody, err := io.ReadAll(r.Body)
-	if err != nil {
-		fmt.Println("JWT handler read body", err)
-	}
-	tok, er := utils.GenJWTtoken(reqBody)
-	if er != nil {
-		w.WriteHeader(503)
-		_, ee := w.Write([]byte("Error decoding JWT token\n"))
-		if ee != nil {
-			log.Println(ee)
-		}
-	} else {
-		w.WriteHeader(200)
-		_, ee := w.Write(tok)
-		if ee != nil {
-			log.Println(ee)
-		}
-		_, _ = w.Write([]byte("\n"))
-	}
-}
+//func jwtLogin(w http.ResponseWriter, r *http.Request) {
+//	reqBody, err := io.ReadAll(r.Body)
+//	if err != nil {
+//		fmt.Println("JWT handler read body", err)
+//	}
+//	tok, er := utils.GenJWTtoken(reqBody)
+//	if er != nil {
+//		w.WriteHeader(503)
+//		_, ee := w.Write([]byte("Error decoding JWT token\n"))
+//		if ee != nil {
+//			log.Println(ee)
+//		}
+//	} else {
+//		w.WriteHeader(200)
+//		_, ee := w.Write(tok)
+//		if ee != nil {
+//			log.Println(ee)
+//		}
+//		_, _ = w.Write([]byte("\n"))
+//	}
+//}
 
 func playmux0() {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", dynHandler)
-	mux.HandleFunc("/loginski", jwtLogin)
+	//mux.HandleFunc("/loginski", jwtLogin)
 	s1 := http.Server{
 		Addr:         configs.To.HttpAddress,
 		Handler:      mux,
@@ -134,7 +133,7 @@ func playmux2() {
 func serveTLS() {
 	muxTLS := http.NewServeMux()
 	muxTLS.HandleFunc("/", dynHandler)
-	muxTLS.HandleFunc("/loginski", jwtLogin)
+	//muxTLS.HandleFunc("/loginski", jwtLogin)
 	sTLS := http.Server{
 		Addr:         configs.To.TLSAddress,
 		Handler:      muxTLS,
