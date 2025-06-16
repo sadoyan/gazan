@@ -1,2 +1,1 @@
-# gazan
-✨ Gazan is now Aralez
+# ✨ This project is renamed and moved to [Aralez](https://github.com/sadoyan/aralez)
